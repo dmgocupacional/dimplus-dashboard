@@ -638,6 +638,61 @@ body::before {
   .modal-body { padding: 14px 16px; }
 }
 /* ── FIM BLOCO MODAL ── */
+
+/* ═══ BLOCO: CALCULADORA NEGOCIAÇÃO ═══ */
+.negociacao-box {
+  margin-top: 20px;
+  background: var(--surface3);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  padding: 16px;
+}
+.negociacao-title {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted2); margin-bottom: 12px;
+  display: flex; align-items: center; gap: 6px;
+}
+.negociacao-valores {
+  display: grid; grid-template-columns: repeat(3,1fr);
+  gap: 8px; margin-bottom: 14px;
+}
+.neg-val-item { display: flex; flex-direction: column; gap: 2px; }
+.neg-val-label { font-family: var(--font-mono); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.neg-val-num { font-family: var(--font-display); font-size: 16px; font-weight: 700; font-style: italic; }
+.neg-val-num.original { color: var(--muted2); }
+.neg-val-num.juros     { color: var(--red); }
+.neg-val-num.total-j   { color: var(--accent2); }
+.negociacao-slider-row {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+}
+.neg-slider-label { font-family: var(--font-mono); font-size: 10px; color: var(--muted); flex-shrink: 0; }
+.neg-slider { flex: 1; height: 4px; accent-color: var(--accent); cursor: pointer; }
+.neg-pct-badge {
+  font-family: var(--font-mono); font-size: 12px; font-weight: 500;
+  color: var(--accent); background: rgba(0,168,118,.12);
+  border-radius: 6px; padding: 2px 8px; min-width: 44px; text-align: center; flex-shrink: 0;
+}
+.negociacao-proposta {
+  background: white; border: 1px solid var(--border2);
+  border-radius: 8px; padding: 12px 14px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.neg-proposta-left { display: flex; flex-direction: column; gap: 2px; }
+.neg-proposta-label { font-family: var(--font-mono); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.neg-proposta-val { font-family: var(--font-display); font-size: 22px; font-weight: 700; font-style: italic; color: var(--accent); }
+.neg-proposta-economia { font-family: var(--font-mono); font-size: 10px; color: var(--red); }
+.btn-copiar-whats {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 14px; border-radius: 8px;
+  background: #25D366; color: white; border: none; cursor: pointer;
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: .04em;
+  transition: all .2s; flex-shrink: 0;
+}
+.btn-copiar-whats:hover { opacity: .88; }
+.btn-copiar-whats.copiado { background: var(--accent); }
+/* ── FIM BLOCO CALCULADORA ── */
+
 .skeleton {
   background: linear-gradient(90deg, #E8EFEb 25%, #F0F5F2 50%, #E8EFEb 75%);
   background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px;
@@ -721,7 +776,7 @@ body::before {
 <div class="app">
 
   <div class="hero">
-    <div class="hero-eyebrow">DIM+ Saúde &nbsp;·&nbsp; Painel Executivo &nbsp;·&nbsp; Ao vivo &nbsp;<span class="version-badge">v2.8 · 20/05/2026</span></div>
+    <div class="hero-eyebrow">DIM+ Saúde &nbsp;·&nbsp; Painel Executivo &nbsp;·&nbsp; Ao vivo &nbsp;<span class="version-badge">v2.9 · 20/05/2026</span></div>
     <h1>Dashboard<br><span>DIM+ Saúde</span></h1>
     <div class="hero-sub">Cobranças, inadimplência e receita — dados em tempo real via Asaas.</div>
     <div class="hero-actions">
@@ -746,7 +801,7 @@ body::before {
   <!-- ═══ ABA: INADIMPLÊNCIA ═══ -->
   <div class="tab-pane active" id="tab-inadimplencia">
 
-    <div class="kpi-strip kpi-strip-5 fade-in" id="kpi-inad">
+    <div class="kpi-strip kpi-strip-5 fade-in" id="kpi-inad" style="grid-template-columns:repeat(6,1fr);">
       <div class="kpi-cell c-teal">
         <div class="kpi-label">Total cobranças</div>
         <div class="kpi-value c-teal" id="k1">—</div>
@@ -759,6 +814,12 @@ body::before {
         <div class="kpi-foot" id="k2f">sem juros/multa</div>
         <div class="kpi-juros" id="k2juros"></div>
         <div class="kpi-icon">$</div>
+      </div>
+      <div class="kpi-cell c-red">
+        <div class="kpi-label">Com juros/multa</div>
+        <div class="kpi-value c-red" id="k6">—</div>
+        <div class="kpi-foot" id="k6f">total atualizado</div>
+        <div class="kpi-icon">↑</div>
       </div>
       <div class="kpi-cell c-green">
         <div class="kpi-label">Nunca pagaram</div>
@@ -1125,6 +1186,39 @@ body::before {
         </thead>
         <tbody id="modal-faturas-tbody"></tbody>
       </table>
+      <!-- Calculadora de negociação -->
+      <div class="negociacao-box" id="neg-box" style="display:none;">
+        <div class="negociacao-title">Calculadora de negociação</div>
+        <div class="negociacao-valores">
+          <div class="neg-val-item">
+            <span class="neg-val-label">Sem juros</span>
+            <span class="neg-val-num original" id="neg-original">—</span>
+          </div>
+          <div class="neg-val-item">
+            <span class="neg-val-label">Juros/multa</span>
+            <span class="neg-val-num juros" id="neg-juros">—</span>
+          </div>
+          <div class="neg-val-item">
+            <span class="neg-val-label">Total atualizado</span>
+            <span class="neg-val-num total-j" id="neg-total">—</span>
+          </div>
+        </div>
+        <div class="negociacao-slider-row">
+          <span class="neg-slider-label">Desconto nos juros:</span>
+          <input type="range" class="neg-slider" id="neg-slider" min="0" max="100" value="100" oninput="updateNegociacao()">
+          <span class="neg-pct-badge" id="neg-pct">100%</span>
+        </div>
+        <div class="negociacao-proposta">
+          <div class="neg-proposta-left">
+            <span class="neg-proposta-label">Proposta ao cliente</span>
+            <span class="neg-proposta-val" id="neg-proposta">—</span>
+            <span class="neg-proposta-economia" id="neg-economia"></span>
+          </div>
+          <button class="btn-copiar-whats" id="btn-copiar-whats" onclick="copiarWhatsApp()">
+            💬 Copiar WhatsApp
+          </button>
+        </div>
+      </div>
     </div>
 
     <div class="modal-footer">
@@ -1431,12 +1525,15 @@ function downloadCSV(filename, rows) {
 function renderKPIsInad(total, totalAberto, totalComJuros, neverCount, totalNunca, totalCancelled, recMesAtual) {
   countUp(document.getElementById('k1'), total, 'n');
   countUp(document.getElementById('k2'), totalAberto, 'r');
+  countUp(document.getElementById('k6'), totalComJuros, 'r');
   countUp(document.getElementById('k3'), neverCount, 'n');
   countUp(document.getElementById('k4'), totalNunca, 'r');
   countUp(document.getElementById('k5'), recMesAtual, 'r');
   document.getElementById('k2f').textContent = 'sem juros/multa';
-  document.getElementById('k2juros').textContent =
-    totalComJuros > totalAberto ? `com juros: ${toR(totalComJuros)}` : '';
+  document.getElementById('k2juros').textContent = '';
+  document.getElementById('k6f').textContent = totalComJuros > totalAberto
+    ? `juros/multa: ${toR(totalComJuros - totalAberto)}`
+    : 'sem acréscimos';
   document.getElementById('k3f').textContent =
     Math.round(neverCount / Math.max(total / 100, 1)) + '% dos CPFs únicos';
   document.getElementById('k4f').textContent =
@@ -1506,6 +1603,9 @@ function renderDebtors(neverPaid) {
   top.forEach(d => {
     const row = document.createElement('div');
     row.className = 'debtor-row';
+    row.style.cursor = 'pointer';
+    row.title = 'Clique para ver faturas';
+    row.onclick = () => openClienteModal(d.customerId);
     const tag = d.categoria === 'Perdido' ? 'tag-lost' : 'tag-ghost';
     const temJuros = d.valorComJuros > d.valorOverdue;
     const jurosHtml = temJuros
@@ -1919,10 +2019,28 @@ function openClienteModal(customerId) {
                              .reduce((s,p) => s+(p.value||0), 0);
   const totalAberto = faturas.filter(p => p.status === 'OVERDUE')
                              .reduce((s,p) => s+(p.value||0), 0);
+  const totalAcrescimos = faturas.filter(p => p.status === 'OVERDUE')
+                             .reduce((s,p) => s+(p.fineValue||0)+(p.interestValue||0), 0);
   document.getElementById('mk1').textContent = toR(totalPago);
   document.getElementById('mk2').textContent = toR(totalAberto);
   document.getElementById('mk3').textContent = faturas.length;
   document.getElementById('mk4').textContent = faturas[0]?.dueDate || '—';
+
+  // Calculadora de negociação
+  const negBox = document.getElementById('neg-box');
+  if (totalAcrescimos > 0) {
+    negBox.style.display = 'block';
+    document.getElementById('neg-original').textContent = toRFull(totalAberto);
+    document.getElementById('neg-juros').textContent    = toRFull(totalAcrescimos);
+    document.getElementById('neg-total').textContent    = toRFull(totalAberto + totalAcrescimos);
+    document.getElementById('neg-slider').value = 100;
+    window._negOriginal    = totalAberto;
+    window._negAcrescimos  = totalAcrescimos;
+    window._negNome        = info.name || cli?.nome || '—';
+    updateNegociacao();
+  } else {
+    negBox.style.display = 'none';
+  }
 
   // Timeline
   renderModalTimeline(faturas);
@@ -2106,6 +2224,76 @@ function kpiDrilldown(tipo) {
   }, 60);
 }
 /* ── FIM BLOCO KPI DRILLDOWN ── */
+
+/* ═══ BLOCO: CALCULADORA NEGOCIAÇÃO ═══ */
+function updateNegociacao() {
+  const pct = parseInt(document.getElementById('neg-slider').value);
+  const original   = window._negOriginal || 0;
+  const acrescimos = window._negAcrescimos || 0;
+  const descontoVal = acrescimos * (pct / 100);
+  const proposta = original + acrescimos - descontoVal;
+  const economia = acrescimos - (acrescimos - descontoVal);
+
+  document.getElementById('neg-pct').textContent = pct + '%';
+  document.getElementById('neg-proposta').textContent = toRFull(proposta);
+  document.getElementById('neg-economia').textContent =
+    pct > 0 ? `economia de ${toRFull(economia)} em juros/multa` : 'sem desconto nos juros';
+
+  const btn = document.getElementById('btn-copiar-whats');
+  btn.classList.remove('copiado');
+  btn.textContent = '💬 Copiar WhatsApp';
+}
+
+function copiarWhatsApp() {
+  const nome      = window._negNome || 'Cliente';
+  const original  = window._negOriginal || 0;
+  const acrescimos= window._negAcrescimos || 0;
+  const pct       = parseInt(document.getElementById('neg-slider').value);
+  const desconto  = acrescimos * (pct / 100);
+  const proposta  = original + acrescimos - desconto;
+  const totalComJuros = original + acrescimos;
+
+  let msg = `Olá ${nome}! 👋\n\n`;
+  msg += `Verificamos que você possui faturas em aberto no DIM+ Saúde.\n\n`;
+  msg += `💰 *Valor original:* ${toRFull(original)}\n`;
+  if (acrescimos > 0) {
+    msg += `📈 *Juros e multa:* ${toRFull(acrescimos)}\n`;
+    msg += `📊 *Total atualizado:* ${toRFull(totalComJuros)}\n\n`;
+    if (pct > 0) {
+      msg += `✅ *Proposta especial:* pague ${toRFull(proposta)} à vista e `;
+      msg += pct === 100
+        ? `removemos *todos os juros e multas*!`
+        : `removemos *${pct}% dos juros* (economia de ${toRFull(desconto)})!`;
+    } else {
+      msg += `✅ *Valor para pagamento:* ${toRFull(proposta)}`;
+    }
+  } else {
+    msg += `\n✅ *Valor para pagamento:* ${toRFull(proposta)}`;
+  }
+  msg += `\n\nAguardamos seu retorno. 🙏`;
+
+  navigator.clipboard.writeText(msg).then(() => {
+    const btn = document.getElementById('btn-copiar-whats');
+    btn.classList.add('copiado');
+    btn.textContent = '✓ Copiado!';
+    setTimeout(() => {
+      btn.classList.remove('copiado');
+      btn.textContent = '💬 Copiar WhatsApp';
+    }, 2500);
+  }).catch(() => {
+    // fallback para browsers sem clipboard API
+    const ta = document.createElement('textarea');
+    ta.value = msg; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    const btn = document.getElementById('btn-copiar-whats');
+    btn.classList.add('copiado');
+    btn.textContent = '✓ Copiado!';
+    setTimeout(() => { btn.classList.remove('copiado'); btn.textContent = '💬 Copiar WhatsApp'; }, 2500);
+  });
+}
+/* ── FIM BLOCO CALCULADORA ── */
 
 /* ═══ BLOCO: INIT ═══ */
 window.addEventListener('DOMContentLoaded', () => {
