@@ -10,20 +10,20 @@
 /* ═══ BLOCO: RESET + VARS ═══ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --bg:        #F0F5F2;
-  --surface:   #FFFFFF;
-  --surface2:  #F5F9F6;
-  --surface3:  #EAF1EC;
-  --border:    rgba(0,80,40,.10);
-  --border2:   rgba(0,80,40,.18);
-  --text:      #1A2A20;
-  --muted:     #6B8C78;
-  --muted2:    #4A6B58;
-  --accent:    #00A876;
-  --accent2:   #E0820A;
-  --gold:      #C9970A;
-  --teal:      #2BB5AC;
-  --red:       #D94F4F;
+  --bg:        #070D0B;
+  --surface:   #0C1410;
+  --surface2:  #111C16;
+  --surface3:  #172419;
+  --border:    rgba(255,255,255,.07);
+  --border2:   rgba(255,255,255,.13);
+  --text:      #E6EDE9;
+  --muted:     #4D6B58;
+  --muted2:    #89A896;
+  --accent:    #00C896;
+  --accent2:   #F5A623;
+  --gold:      #F5C542;
+  --teal:      #4ECDC4;
+  --red:       #FF6B6B;
   --font-display: 'Fraunces', serif;
   --font-mono:    'DM Mono', monospace;
   --font-body:    'DM Sans', sans-serif;
@@ -44,8 +44,8 @@ body::before {
   content: '';
   position: fixed; inset: 0;
   background-image:
-    linear-gradient(rgba(0,168,118,.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,168,118,.04) 1px, transparent 1px);
+    linear-gradient(rgba(255,255,255,.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.015) 1px, transparent 1px);
   background-size: 40px 40px;
   pointer-events: none; z-index: 0;
 }
@@ -56,7 +56,7 @@ body::before {
 /* ═══ BLOCO: SETUP MODAL ═══ */
 .setup-overlay {
   position: fixed; inset: 0;
-  background: rgba(240,245,242,.97);
+  background: rgba(7,13,11,.96);
   backdrop-filter: blur(8px);
   z-index: 100;
   display: flex; align-items: center; justify-content: center;
@@ -69,7 +69,6 @@ body::before {
   padding: 40px;
   max-width: 540px; width: 100%;
   animation: fadeUp .4s forwards;
-  box-shadow: 0 8px 40px rgba(0,40,20,.12);
 }
 .setup-eyebrow {
   font-family: var(--font-mono);
@@ -102,7 +101,7 @@ body::before {
 .setup-input::placeholder { color: var(--muted); }
 .setup-btn {
   width: 100%; padding: 14px;
-  background: var(--accent); color: #FFFFFF;
+  background: var(--accent); color: #070D0B;
   border: none; border-radius: var(--r);
   font-family: var(--font-display); font-size: 15px; font-weight: 700; font-style: italic;
   cursor: pointer; transition: opacity .2s;
@@ -139,7 +138,7 @@ body::before {
 }
 .btn-refresh {
   display: flex; align-items: center; gap: 8px;
-  padding: 9px 16px; background: var(--accent); color: #FFFFFF;
+  padding: 9px 16px; background: var(--accent); color: #070D0B;
   border: none; border-radius: var(--r);
   font-family: var(--font-display); font-size: 13px; font-weight: 700; font-style: italic;
   cursor: pointer; transition: opacity .2s;
@@ -193,7 +192,6 @@ body::before {
   gap: 1px; background: var(--border);
   border: 1px solid var(--border); border-radius: var(--r2);
   overflow: hidden; margin-bottom: 20px;
-  box-shadow: 0 1px 4px rgba(0,40,20,.06), 0 4px 16px rgba(0,40,20,.04);
 }
 .kpi-strip-5 { grid-template-columns: repeat(5, 1fr); }
 .kpi-strip-3 { grid-template-columns: repeat(3, 1fr); }
@@ -242,8 +240,8 @@ body::before {
 
 /* ═══ BLOCO: ALERT ═══ */
 .alert-banner {
-  background: linear-gradient(135deg, rgba(0,168,118,.06), rgba(224,130,10,.04));
-  border: 1px solid rgba(0,168,118,.25); border-radius: var(--r2);
+  background: linear-gradient(135deg, rgba(0,200,150,.05), rgba(245,166,35,.03));
+  border: 1px solid rgba(0,200,150,.18); border-radius: var(--r2);
   padding: 14px 18px; display: flex; gap: 14px; align-items: flex-start;
   margin-bottom: 18px;
 }
@@ -265,7 +263,6 @@ body::before {
 .panel {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--r2); padding: 20px;
-  box-shadow: 0 1px 4px rgba(0,40,20,.06), 0 4px 16px rgba(0,40,20,.04);
 }
 .panel-title {
   font-family: var(--font-display); font-size: 13px;
@@ -292,7 +289,7 @@ body::before {
 .chart-bars { display: flex; flex-direction: column; gap: 7px; }
 .bar-row { display: grid; grid-template-columns: 52px 1fr 38px 60px; align-items: center; gap: 10px; }
 .bar-month { font-family: var(--font-mono); font-size: 10px; color: var(--muted); text-align: right; }
-.bar-track { height: 20px; background: #E8EFEb; border-radius: 4px; overflow: hidden; }
+.bar-track { height: 20px; background: var(--surface3); border-radius: 4px; overflow: hidden; }
 .bar-fill {
   height: 100%; border-radius: 4px; width: 0%;
   transition: width 1.2s cubic-bezier(.16,1,.3,1);
@@ -303,7 +300,7 @@ body::before {
   content: ''; position: absolute; inset: 0;
   background: linear-gradient(90deg, transparent 60%, rgba(255,255,255,.08));
 }
-.bar-count { font-family: var(--font-mono); font-size: 10px; color: rgba(255,255,255,.9); position: relative; z-index: 1; }
+.bar-count { font-family: var(--font-mono); font-size: 10px; color: rgba(255,255,255,.85); position: relative; z-index: 1; }
 .bar-n { font-family: var(--font-mono); font-size: 11px; color: var(--text); text-align: center; }
 .bar-val { font-family: var(--font-mono); font-size: 10px; color: var(--muted); text-align: right; }
 
@@ -321,10 +318,10 @@ body::before {
 .leg-count { font-family: var(--font-mono); font-size: 12px; color: var(--muted2); }
 .donut-center-label {
   font-family: var(--font-display); font-weight: 700; font-style: italic;
-  font-size: 24px; fill: #1A2A20; text-anchor: middle; dominant-baseline: middle;
+  font-size: 24px; fill: var(--text); text-anchor: middle; dominant-baseline: middle;
 }
 .donut-center-sub {
-  font-family: var(--font-mono); font-size: 9px; fill: #6B8C78;
+  font-family: var(--font-mono); font-size: 9px; fill: var(--muted);
   text-anchor: middle; dominant-baseline: middle; letter-spacing: .1em; text-transform: uppercase;
 }
 
@@ -354,8 +351,8 @@ body::before {
 .debtor-fat { font-family: var(--font-mono); font-size: 11px; color: var(--accent2); text-align: center; }
 .debtor-val { font-family: var(--font-mono); font-size: 11px; color: var(--gold); text-align: right; }
 .debtor-tag { font-size: 9px; font-family: var(--font-mono); letter-spacing: .05em; padding: 2px 6px; border-radius: 4px; text-align: center; }
-.tag-ghost { background: rgba(43,181,172,.12); color: #1A8880; }
-.tag-lost  { background: rgba(224,130,10,.12);  color: #A05800; }
+.tag-ghost { background: rgba(78,205,196,.12); color: #4ECDC4; }
+.tag-lost  { background: rgba(245,166,35,.12);  color: #F5A623; }
 
 /* ═══ BLOCO: PRIORIDADES ═══ */
 .priority-blocks { display: flex; flex-direction: column; gap: 10px; }
@@ -364,9 +361,9 @@ body::before {
   border-radius: var(--r); padding: 14px 16px;
   display: flex; align-items: center; gap: 14px;
   position: relative; overflow: hidden;
-  transition: border-color .2s, transform .2s, box-shadow .2s; cursor: default;
+  transition: border-color .2s, transform .2s; cursor: default;
 }
-.priority-block:hover { border-color: var(--border2); transform: translateX(4px); box-shadow: 0 2px 8px rgba(0,40,20,.08); }
+.priority-block:hover { border-color: var(--border2); transform: translateX(4px); }
 .priority-block::before {
   content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
 }
@@ -392,7 +389,7 @@ body::before {
 .receita-bars { display: flex; flex-direction: column; gap: 6px; }
 .receita-row { display: grid; grid-template-columns: 52px 1fr 1fr 70px; align-items: center; gap: 8px; }
 .receita-month { font-family: var(--font-mono); font-size: 10px; color: var(--muted); text-align: right; }
-.receita-track { height: 14px; background: #E8EFEb; border-radius: 3px; overflow: hidden; position: relative; }
+.receita-track { height: 14px; background: var(--surface3); border-radius: 3px; overflow: hidden; position: relative; }
 .receita-fill {
   height: 100%; border-radius: 3px; width: 0%;
   transition: width 1.2s cubic-bezier(.16,1,.3,1);
@@ -412,7 +409,7 @@ body::before {
   background: transparent; color: var(--muted2);
   transition: all .2s;
 }
-.filter-btn.active { background: var(--accent); color: #FFFFFF; border-color: var(--accent); }
+.filter-btn.active { background: var(--accent); color: #070D0B; border-color: var(--accent); }
 .filter-btn:hover:not(.active) { border-color: var(--muted2); color: var(--text); }
 .clientes-table { width: 100%; border-collapse: collapse; }
 .clientes-table th {
@@ -428,234 +425,23 @@ body::before {
   transition: color .15s;
 }
 .clientes-table tr:last-child td { border-bottom: none; }
-.clientes-table tr:hover td { color: var(--text); background: var(--surface2); cursor: pointer; }
+.clientes-table tr:hover td { color: var(--text); background: var(--surface2); }
 .clientes-table td:last-child { text-align: right; font-family: var(--font-mono); font-size: 11px; color: var(--gold); }
 .status-pill {
   display: inline-block; padding: 2px 7px; border-radius: 10px;
   font-family: var(--font-mono); font-size: 9px; letter-spacing: .05em;
 }
-.pill-ativo    { background: rgba(0,168,118,.12); color: #007A55; }
-.pill-overdue  { background: rgba(217,79,79,.10); color: #B03030; }
-.pill-churn    { background: rgba(224,130,10,.12); color: #A05800; }
-.pill-fantasma { background: rgba(43,181,172,.12); color: #1A8880; }
+.pill-ativo    { background: rgba(0,200,150,.12); color: var(--accent); }
+.pill-overdue  { background: rgba(255,107,107,.12); color: var(--red); }
+.pill-churn    { background: rgba(245,166,35,.12); color: var(--accent2); }
+.pill-fantasma { background: rgba(78,205,196,.12); color: var(--teal); }
 
-/* ═══ BLOCO: ENRICH PROGRESS ═══ */
-.enrich-bar-wrap {
-  margin-bottom: 14px;
-  background: var(--surface3);
-  border: 1px solid var(--border2);
-  border-radius: var(--r);
-  padding: 12px 16px;
-  display: none;
-}
-.enrich-bar-wrap.visible { display: block; }
-.enrich-bar-label {
-  font-family: var(--font-mono); font-size: 10px; color: var(--muted2);
-  letter-spacing: .06em; margin-bottom: 8px;
-  display: flex; justify-content: space-between;
-}
-.enrich-bar-track {
-  height: 4px; background: #D8E8DF; border-radius: 2px; overflow: hidden;
-}
-.enrich-bar-fill {
-  height: 100%; background: var(--accent); border-radius: 2px;
-  width: 0%; transition: width .3s ease;
-}
-.enrich-selector {
-  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-  margin-bottom: 14px; padding: 10px 14px;
-  background: var(--surface3); border: 1px solid var(--border);
-  border-radius: var(--r);
-}
-.enrich-selector-label {
-  font-family: var(--font-mono); font-size: 10px;
-  letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
-  flex-shrink: 0;
-}
-.enrich-opt {
-  padding: 4px 10px; border-radius: 6px;
-  font-family: var(--font-mono); font-size: 10px; letter-spacing: .06em;
-  cursor: pointer; border: 1px solid var(--border2);
-  background: transparent; color: var(--muted2);
-  transition: all .2s;
-}
-.enrich-opt:hover:not(.active) { border-color: var(--muted2); color: var(--text); }
-.enrich-opt.active { background: var(--accent); color: #FFFFFF; border-color: var(--accent); font-weight: 500; }
-.enrich-warning {
-  font-family: var(--font-mono); font-size: 10px; color: var(--accent2);
-  margin-left: 4px;
-}
-
-/* ═══ BLOCO: MODAL CLIENTE ═══ */
-.modal-overlay {
-  position: fixed; inset: 0; z-index: 200;
-  background: rgba(26,42,32,.45);
-  backdrop-filter: blur(4px);
-  display: flex; align-items: center; justify-content: center;
-  padding: 24px; opacity: 0;
-  transition: opacity .25s;
-  pointer-events: none;
-}
-.modal-overlay.open { opacity: 1; pointer-events: all; }
-.modal-box {
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  border-radius: 20px;
-  width: 100%; max-width: 760px;
-  max-height: 88vh;
-  display: flex; flex-direction: column;
-  box-shadow: 0 24px 80px rgba(0,40,20,.18), 0 4px 20px rgba(0,40,20,.10);
-  transform: translateY(16px) scale(.98);
-  transition: transform .28s cubic-bezier(.16,1,.3,1);
-  overflow: hidden;
-}
-.modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
-
-.modal-header {
-  padding: 22px 24px 18px;
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
-  flex-shrink: 0;
-}
-.modal-header-left { display: flex; flex-direction: column; gap: 4px; }
-.modal-name {
-  font-family: var(--font-display); font-size: 22px;
-  font-weight: 700; font-style: italic; color: var(--text); line-height: 1.1;
-}
-.modal-meta {
-  display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
-  font-family: var(--font-mono); font-size: 11px; color: var(--muted);
-}
-.modal-meta span { display: flex; align-items: center; gap: 4px; }
-.modal-close {
-  width: 32px; height: 32px; border-radius: 50%;
-  background: var(--surface3); border: 1px solid var(--border);
-  font-size: 16px; color: var(--muted); cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0; transition: background .2s, color .2s;
-}
-.modal-close:hover { background: var(--border); color: var(--text); }
-
-.modal-kpis {
-  display: grid; grid-template-columns: repeat(4, 1fr);
-  gap: 1px; background: var(--border);
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-}
-.modal-kpi {
-  background: var(--surface); padding: 14px 16px;
-}
-.modal-kpi-label {
-  font-family: var(--font-mono); font-size: 9px;
-  letter-spacing: .12em; text-transform: uppercase;
-  color: var(--muted); margin-bottom: 4px;
-}
-.modal-kpi-val {
-  font-family: var(--font-display); font-size: 20px;
-  font-weight: 700; font-style: italic; line-height: 1;
-}
-
-.modal-body { overflow-y: auto; padding: 20px 24px; flex: 1; }
-
-.modal-section-title {
-  font-family: var(--font-mono); font-size: 10px;
-  letter-spacing: .12em; text-transform: uppercase;
-  color: var(--muted); margin-bottom: 12px; margin-top: 20px;
-}
-.modal-section-title:first-child { margin-top: 0; }
-
-/* timeline mensal */
-.modal-timeline {
-  display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 4px;
-}
-.tl-month {
-  display: flex; flex-direction: column; align-items: center; gap: 3px;
-  cursor: default;
-}
-.tl-bar {
-  width: 28px; height: 32px; border-radius: 5px;
-  transition: transform .15s;
-  position: relative;
-}
-.tl-bar:hover { transform: scaleY(1.08); }
-.tl-bar.pago    { background: var(--accent); opacity: .85; }
-.tl-bar.aberto  { background: var(--accent2); opacity: .75; }
-.tl-bar.misto   { background: linear-gradient(180deg, var(--accent) 50%, var(--accent2) 50%); opacity: .8; }
-.tl-bar.vazio   { background: #E2EBE6; }
-.tl-label {
-  font-family: var(--font-mono); font-size: 9px; color: var(--muted);
-  letter-spacing: .04em;
-}
-.tl-legend {
-  display: flex; gap: 14px; margin-top: 8px; flex-wrap: wrap;
-}
-.tl-leg-item {
-  display: flex; align-items: center; gap: 5px;
-  font-family: var(--font-mono); font-size: 10px; color: var(--muted);
-}
-.tl-leg-dot {
-  width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0;
-}
-
-/* tabela faturas */
-.faturas-table { width: 100%; border-collapse: collapse; }
-.faturas-table th {
-  font-family: var(--font-mono); font-size: 9px;
-  letter-spacing: .1em; text-transform: uppercase;
-  color: var(--muted); text-align: left;
-  padding: 0 8px 8px; border-bottom: 1px solid var(--border2);
-}
-.faturas-table th:last-child { text-align: right; }
-.faturas-table td {
-  padding: 8px 8px; border-bottom: 1px solid var(--border);
-  font-size: 12px; color: var(--muted2);
-}
-.faturas-table tr:last-child td { border-bottom: none; }
-.faturas-table tr:hover td { background: var(--surface2); }
-.faturas-table td:last-child { text-align: right; font-family: var(--font-mono); font-size: 11px; }
-
-.modal-footer {
-  padding: 14px 24px;
-  border-top: 1px solid var(--border);
-  display: flex; justify-content: flex-end; gap: 10px;
-  flex-shrink: 0; background: var(--surface2);
-}
-.modal-footer .btn-export {
-  padding: 8px 16px; font-size: 11px;
-}
-
-/* status colors na tabela de faturas */
-.fs-received { color: #007A55; }
-.fs-overdue  { color: #B03030; }
-.fs-cancelled{ color: #8A6A30; }
-.fs-pending  { color: var(--muted); }
-
-@media (max-width: 600px) {
-  .modal-kpis { grid-template-columns: repeat(2,1fr); }
-  .modal-box { max-height: 95vh; border-radius: 14px; }
-  .modal-header { padding: 16px; }
-  .modal-body { padding: 14px 16px; }
-}
-/* ── FIM BLOCO MODAL ── */
+/* ═══ BLOCO: SKELETON ═══ */
 .skeleton {
-  background: linear-gradient(90deg, #E8EFEb 25%, #F0F5F2 50%, #E8EFEb 75%);
+  background: linear-gradient(90deg, var(--surface2) 25%, var(--surface3) 50%, var(--surface2) 75%);
   background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px;
 }
 @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-
-/* ═══ BLOCO: VERSION BADGE ═══ */
-.version-badge {
-  display: inline-flex; align-items: center; gap: 5px;
-  font-family: var(--font-mono); font-size: 10px; letter-spacing: .08em;
-  color: var(--muted); background: var(--surface3);
-  border: 1px solid var(--border2); border-radius: 20px;
-  padding: 3px 10px;
-}
-.version-badge::before {
-  content: ''; width: 6px; height: 6px; border-radius: 50%;
-  background: var(--accent); opacity: .7;
-}
-/* ── FIM BLOCO ── */
 
 /* ═══ BLOCO: FOOTER ═══ */
 .footer {
@@ -699,7 +485,7 @@ body::before {
 </head>
 <body>
 
-<div class="scanline" style="display:none;"></div>
+<div class="scanline"></div>
 
 <!-- ═══ SETUP MODAL ═══ -->
 <div class="setup-overlay" id="setup-overlay">
@@ -720,7 +506,7 @@ body::before {
 <div class="app">
 
   <div class="hero">
-    <div class="hero-eyebrow">DIM+ Saúde &nbsp;·&nbsp; Painel Executivo &nbsp;·&nbsp; Ao vivo &nbsp;<span class="version-badge">v2.6 · 20/05/2026</span></div>
+    <div class="hero-eyebrow">DIM+ Saúde &nbsp;·&nbsp; Painel Executivo &nbsp;·&nbsp; Ao vivo</div>
     <h1>Dashboard<br><span>DIM+ Saúde</span></h1>
     <div class="hero-sub">Cobranças, inadimplência e receita — dados em tempo real via Asaas.</div>
     <div class="hero-actions">
@@ -765,9 +551,9 @@ body::before {
         <div class="kpi-icon">∅</div>
       </div>
       <div class="kpi-cell c-gold">
-        <div class="kpi-label">Valor · nunca pagaram</div>
+        <div class="kpi-label">Valor irrecuperável</div>
         <div class="kpi-value c-gold" id="k4">—</div>
-        <div class="kpi-foot">total acumulado sem 1 pagamento</div>
+        <div class="kpi-foot">acumulado nunca pagaram</div>
         <div class="kpi-icon">!</div>
       </div>
     </div>
@@ -803,11 +589,11 @@ body::before {
         <div class="panel-title">Distribuição por status</div>
         <div class="donut-wrap">
           <svg width="150" height="150" viewBox="0 0 160 160" role="img">
-            <circle cx="80" cy="80" r="60" fill="none" stroke="#E2EBE6" stroke-width="16"/>
-            <circle id="arc-g" cx="80" cy="80" r="60" fill="none" stroke="#2BB5AC" stroke-width="16"
+            <circle cx="80" cy="80" r="60" fill="none" stroke="var(--surface3)" stroke-width="16"/>
+            <circle id="arc-g" cx="80" cy="80" r="60" fill="none" stroke="#4ECDC4" stroke-width="16"
               stroke-dasharray="0 377" stroke-dashoffset="94"
               style="transition:stroke-dasharray 1.4s cubic-bezier(.16,1,.3,1) .7s;transform:rotate(-90deg);transform-origin:center;"/>
-            <circle id="arc-l" cx="80" cy="80" r="60" fill="none" stroke="#E0820A" stroke-width="16"
+            <circle id="arc-l" cx="80" cy="80" r="60" fill="none" stroke="#F5A623" stroke-width="16"
               stroke-dasharray="0 377" stroke-dashoffset="94"
               style="transition:stroke-dasharray 1.4s cubic-bezier(.16,1,.3,1) .9s;transform:rotate(-90deg);transform-origin:center;"/>
             <text x="80" y="73" class="donut-center-label" id="dcv">—</text>
@@ -815,15 +601,15 @@ body::before {
           </svg>
           <div class="donut-legend">
             <div class="donut-leg-row">
-              <div class="donut-leg-left"><div class="leg-dot" style="background:#2BB5AC;"></div><div class="leg-name">Fantasmas</div></div>
+              <div class="donut-leg-left"><div class="leg-dot" style="background:#4ECDC4;"></div><div class="leg-name">Fantasmas</div></div>
               <div class="leg-count" id="lg1">—</div>
             </div>
             <div class="donut-leg-row">
-              <div class="donut-leg-left"><div class="leg-dot" style="background:#E0820A;"></div><div class="leg-name">Perdidos (churn)</div></div>
+              <div class="donut-leg-left"><div class="leg-dot" style="background:#F5A623;"></div><div class="leg-name">Perdidos (churn)</div></div>
               <div class="leg-count" id="lg2">—</div>
             </div>
             <div class="donut-leg-row">
-              <div class="donut-leg-left"><div class="leg-dot" style="background:#B0C4B8;"></div><div class="leg-name">Com algum pagamento</div></div>
+              <div class="donut-leg-left"><div class="leg-dot" style="background:var(--muted);"></div><div class="leg-name">Com algum pagamento</div></div>
               <div class="leg-count" id="lg3">—</div>
             </div>
           </div>
@@ -995,25 +781,6 @@ body::before {
       </div>
     </div>
 
-    <div class="enrich-selector">
-      <span class="enrich-selector-label">Carregar nomes:</span>
-      <button class="enrich-opt" onclick="setEnrichLimit(50, this)">50</button>
-      <button class="enrich-opt active" onclick="setEnrichLimit(100, this)">100</button>
-      <button class="enrich-opt" onclick="setEnrichLimit(200, this)">200</button>
-      <button class="enrich-opt" id="enrich-todos-btn" onclick="setEnrichLimit('todos', this)">Todos</button>
-      <span class="enrich-warning" id="enrich-warning"></span>
-    </div>
-
-    <div class="enrich-bar-wrap" id="enrich-bar-wrap">
-      <div class="enrich-bar-label">
-        <span id="enrich-bar-txt">Buscando nomes...</span>
-        <span id="enrich-bar-pct">0%</span>
-      </div>
-      <div class="enrich-bar-track">
-        <div class="enrich-bar-fill" id="enrich-bar-fill"></div>
-      </div>
-    </div>
-
     <div class="panel full-grid">
       <div class="panel-title">
         Base de clientes · visão geral
@@ -1057,81 +824,11 @@ body::before {
 
 </div>
 
-<!-- ═══ MODAL CLIENTE ═══ -->
-<div class="modal-overlay" id="modal-overlay" onclick="handleModalOverlayClick(event)">
-  <div class="modal-box" id="modal-box">
-
-    <div class="modal-header">
-      <div class="modal-header-left">
-        <div class="modal-name" id="modal-nome">—</div>
-        <div class="modal-meta">
-          <span id="modal-phone">—</span>
-          <span>·</span>
-          <span id="modal-cpf">—</span>
-          <span>·</span>
-          <span id="modal-status-pill"></span>
-          <span>·</span>
-          <span id="modal-tempo">—</span>
-        </div>
-      </div>
-      <button class="modal-close" onclick="closeModal()" title="Fechar (ESC)">✕</button>
-    </div>
-
-    <div class="modal-kpis">
-      <div class="modal-kpi">
-        <div class="modal-kpi-label">Total pago</div>
-        <div class="modal-kpi-val" id="mk1" style="color:#007A55;">—</div>
-      </div>
-      <div class="modal-kpi">
-        <div class="modal-kpi-label">Em aberto</div>
-        <div class="modal-kpi-val" id="mk2" style="color:#B03030;">—</div>
-      </div>
-      <div class="modal-kpi">
-        <div class="modal-kpi-label">Qtd faturas</div>
-        <div class="modal-kpi-val" id="mk3" style="color:var(--muted2);">—</div>
-      </div>
-      <div class="modal-kpi">
-        <div class="modal-kpi-label">Última fatura</div>
-        <div class="modal-kpi-val" id="mk4" style="color:var(--muted2);font-size:14px;">—</div>
-      </div>
-    </div>
-
-    <div class="modal-body">
-      <div class="modal-section-title">Histórico de pagamentos · por mês</div>
-      <div class="modal-timeline" id="modal-timeline"></div>
-      <div class="tl-legend">
-        <div class="tl-leg-item"><div class="tl-leg-dot" style="background:var(--accent);"></div>Pago</div>
-        <div class="tl-leg-item"><div class="tl-leg-dot" style="background:var(--accent2);"></div>Em aberto</div>
-        <div class="tl-leg-item"><div class="tl-leg-dot" style="background:#E2EBE6;border:1px solid var(--border);"></div>Sem fatura</div>
-      </div>
-
-      <div class="modal-section-title" style="margin-top:22px;">Faturas</div>
-      <table class="faturas-table" id="modal-faturas-table">
-        <thead>
-          <tr>
-            <th>Vencimento</th>
-            <th>Descrição</th>
-            <th>Status</th>
-            <th>Valor</th>
-          </tr>
-        </thead>
-        <tbody id="modal-faturas-tbody"></tbody>
-      </table>
-    </div>
-
-    <div class="modal-footer">
-      <button class="btn-export" id="modal-export-btn" onclick="exportClienteIndividualCSV()">↓ Exportar CSV deste cliente</button>
-    </div>
-
-  </div>
-</div>
-
 <script>
 /* ═══ BLOCO: ESTADO GLOBAL ═══ */
 const LS = 'dimplus_worker_url';
 let WORKER = localStorage.getItem(LS) || '';
 let busy = false;
-let _enrichLimit = 100; // padrão
 
 // Cache de dados processados para export e render
 let _cache = {
@@ -1141,7 +838,6 @@ let _cache = {
   customers: {},     // mapa customerId → { name, phone, cpfCnpj }
   receitaMensal: {}, // mapa YYYY-MM → { recebido, aberto }
   clientes: [],      // lista de clientes para aba clientes
-  allCustomerIds: [], // todos os IDs únicos de clientes
 };
 
 /* ═══ BLOCO: SETUP ═══ */
@@ -1191,60 +887,23 @@ async function fetchAll(path, params) {
   return all;
 }
 
-/* ═══ BLOCO: ENRICH SELECTOR ═══ */
-function setEnrichLimit(val, btn) {
-  _enrichLimit = val;
-  document.querySelectorAll('.enrich-opt').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  const warn = document.getElementById('enrich-warning');
-  if (val === 'todos' && _cache.allCustomerIds.length > 0) {
-    warn.textContent = `≈ ${_cache.allCustomerIds.length} chamadas — pode demorar`;
-  } else {
-    warn.textContent = '';
-  }
-  // Se já tem dados carregados, re-enrich com novo limite
-  if (_cache.all.length > 0) {
-    runEnrichAndRenderClientes();
-  }
-}
-
-function setEnrichProgress(done, total, txt) {
-  const wrap = document.getElementById('enrich-bar-wrap');
-  if (!total) { wrap.classList.remove('visible'); return; }
-  wrap.classList.add('visible');
-  const pct = Math.round(done / total * 100);
-  document.getElementById('enrich-bar-fill').style.width = pct + '%';
-  document.getElementById('enrich-bar-pct').textContent = pct + '%';
-  document.getElementById('enrich-bar-txt').textContent = txt || `Buscando nomes... ${done}/${total}`;
-  if (done >= total) {
-    setTimeout(() => wrap.classList.remove('visible'), 1200);
-  }
-}
-
-/* ═══ BLOCO: FETCH CUSTOMERS (batch com progresso) ═══ */
-async function enrichCustomers(customerIds, onProgress) {
+/* ═══ BLOCO: FETCH CUSTOMERS (batch top N) ═══ */
+async function enrichCustomers(customerIds) {
   const result = {};
-  const ids = [...new Set(customerIds)];
-  const BATCH = 8; // paralelo por lote
-  let done = 0;
-  for (let i = 0; i < ids.length; i += BATCH) {
-    const chunk = ids.slice(i, i + BATCH);
-    await Promise.all(chunk.map(async id => {
-      try {
-        const r = await fetch(`${WORKER}/customers/${id}`);
-        if (!r.ok) return;
-        const d = await r.json();
-        result[id] = {
-          name: d.name || '—',
-          phone: d.mobilePhone || d.phone || '—',
-          cpfCnpj: d.cpfCnpj || '—',
-          email: d.email || '—',
-        };
-      } catch { /* ignora falha individual */ }
-    }));
-    done += chunk.length;
-    if (onProgress) onProgress(done, ids.length);
-  }
+  const ids = [...new Set(customerIds)].slice(0, 60); // max 60 lookups
+  await Promise.all(ids.map(async id => {
+    try {
+      const r = await fetch(`${WORKER}/customers/${id}`);
+      if (!r.ok) return;
+      const d = await r.json();
+      result[id] = {
+        name: d.name || '—',
+        phone: d.mobilePhone || d.phone || '—',
+        cpfCnpj: d.cpfCnpj || '—',
+        email: d.email || '—',
+      };
+    } catch { /* ignora falha individual */ }
+  }));
   return result;
 }
 
@@ -1258,7 +917,7 @@ function processInadimplencia(payments) {
   }
 
   const neverPaid = [];
-  let totalNunca = 0; // soma de TODOS os valores dos CPFs que nunca pagaram
+  let totalAberto = 0;
 
   for (const [cid, c] of Object.entries(byCustomer)) {
     const paid = c.rows.some(p => ['RECEIVED','CONFIRMED','RECEIVED_IN_CASH'].includes(p.status));
@@ -1266,10 +925,10 @@ function processInadimplencia(payments) {
     const perdido = c.rows.some(p => p.status === 'CANCELLED' || p.deleted);
     const valor = c.rows.reduce((s, p) => s + (p.value || 0), 0);
     const datas = c.rows.map(p => p.dueDate).filter(Boolean).sort();
-    totalNunca += valor;
+    totalAberto += valor;
     neverPaid.push({
       customerId: cid,
-      nome: '—', phone: '—',
+      nome: '—', phone: '—', // preenchido depois pelo enrich
       faturas: c.rows.length, valor,
       primeira: datas[0] || '',
       categoria: perdido ? 'Perdido' : 'Fantasma',
@@ -1277,7 +936,7 @@ function processInadimplencia(payments) {
   }
 
   neverPaid.sort((a, b) => b.valor - a.valor);
-  return { neverPaid, totalNunca, byCustomer };
+  return { neverPaid, totalAberto, byCustomer };
 }
 
 /* ═══ BLOCO: PROCESSAR RECEITA ═══ */
@@ -1592,15 +1251,14 @@ function renderTopPagadores(clientes) {
   });
 }
 
-function renderComposicao(rec, neverPaid, totalNunca) {
+function renderComposicao(rec, neverPaid) {
   const wrap = document.getElementById('composicao-wrap');
   wrap.innerHTML = '';
-  const nuncaVal = totalNunca != null ? totalNunca : neverPaid.reduce((s,r) => s+r.valor, 0);
-  const totalV = rec.totalRecebido + nuncaVal;
+  const totalV = rec.totalRecebido + neverPaid.reduce((s,r) => s+r.valor, 0);
   if (!totalV) return;
   const items = [
     { label: 'Receita recebida', val: rec.totalRecebido, color: 'var(--accent)' },
-    { label: 'Nunca pagaram', val: nuncaVal, color: 'var(--accent2)' },
+    { label: 'Nunca pagaram', val: neverPaid.reduce((s,r) => s+r.valor, 0), color: 'var(--accent2)' },
   ];
   items.forEach(item => {
     const pct = (item.val / totalV * 100).toFixed(1);
@@ -1651,9 +1309,6 @@ function renderClientesTabela(clientes, filtro) {
   show.forEach(c => {
     const [pillCls, pillLabel] = pillMap[c.status] || ['', c.status];
     const tr = document.createElement('tr');
-    tr.style.cursor = 'pointer';
-    tr.title = 'Clique para ver faturas';
-    tr.onclick = () => openClienteModal(c.customerId);
     tr.innerHTML = `
       <td>${c.nome}</td>
       <td style="font-family:var(--font-mono);font-size:10px;">${c.phone}</td>
@@ -1707,62 +1362,6 @@ function exportClientesCSV() {
   downloadCSV('dimplus_clientes.csv', rows);
 }
 
-/* ═══ BLOCO: ENRICH + RENDER CLIENTES (separado para re-trigger) ═══ */
-async function runEnrichAndRenderClientes() {
-  if (!_cache.all.length) return;
-
-  const all = _cache.all;
-  const allValidIds = _cache.allCustomerIds;
-
-  // Ordenar IDs por valor pago (desc) para priorizar os mais relevantes
-  const pagoById = {};
-  for (const p of all) {
-    if (!p.customer) continue;
-    if (['RECEIVED','CONFIRMED','RECEIVED_IN_CASH'].includes(p.status)) {
-      pagoById[p.customer] = (pagoById[p.customer] || 0) + (p.value || 0);
-    }
-  }
-  const idsPorValor = [...allValidIds].sort((a,b) => (pagoById[b]||0) - (pagoById[a]||0));
-
-  // IDs dos neverPaid (sempre enrich independente do limite)
-  const idsInad = _cache.neverPaid.slice(0, 60).map(r => r.customerId);
-
-  // IDs da aba clientes conforme limite
-  const limit = _enrichLimit === 'todos' ? allValidIds.length : _enrichLimit;
-  const idsCli = idsPorValor.slice(0, limit);
-
-  const allToFetch = [...new Set([...idsInad, ...idsCli])].filter(id => !_cache.customers[id]);
-
-  if (allToFetch.length > 0) {
-    setEnrichProgress(0, allToFetch.length, `Buscando nomes... 0/${allToFetch.length}`);
-    const newCustomers = await enrichCustomers(allToFetch, (done, total) => {
-      setEnrichProgress(done, total, `Buscando nomes... ${done}/${total}`);
-    });
-    Object.assign(_cache.customers, newCustomers);
-    setEnrichProgress(allToFetch.length, allToFetch.length, 'Concluído');
-  }
-
-  // Aplicar nomes nos neverPaid
-  _cache.neverPaid.forEach(r => {
-    const c = _cache.customers[r.customerId];
-    if (c) { r.nome = c.name; r.phone = c.phone; r.cpfCnpj = c.cpfCnpj; }
-  });
-
-  // Re-processar clientes com customers atualizados
-  const cliData = processClientes(all, _cache.customers);
-  _cache.clientes = cliData.clientes;
-
-  // Re-render
-  renderDebtors(_cache.neverPaid);
-  renderTopPagadores(cliData.clientes);
-  renderKPIsClientes(cliData);
-  renderClientesTabela(cliData.clientes, _clientesFiltro);
-
-  // Atualizar aviso de "Todos"
-  const warn = document.getElementById('enrich-warning');
-  if (_enrichLimit === 'todos') warn.textContent = '';
-}
-
 /* ═══ BLOCO: LOAD PRINCIPAL ═══ */
 async function loadData() {
   if (busy) return;
@@ -1785,42 +1384,62 @@ async function loadData() {
     ]);
     const all = [...overdue, ...received, ...confirmed, ...cancelled];
     _cache.all = all;
-    _cache.customers = {}; // reset cache de nomes ao recarregar
-
-    // Calcular todos os IDs únicos válidos
-    _cache.allCustomerIds = [...new Set(all.map(p => p.customer).filter(Boolean))];
-
-    // Atualizar aviso "Todos" no seletor
-    const todosBtn = document.getElementById('enrich-todos-btn');
-    if (todosBtn) {
-      todosBtn.textContent = `Todos (${_cache.allCustomerIds.length})`;
-    }
 
     // 2. Processar inadimplência
     setStatus('loading', 'Processando inadimplência...');
-    const { neverPaid, totalNunca } = processInadimplencia(all);
+    const { neverPaid, totalAberto, byCustomer } = processInadimplencia(all);
+
+    // 3. Enrich de nomes — top 60 devedores + top 60 por valor pago
+    setStatus('loading', 'Buscando nomes dos clientes...');
+    const topIdsInad  = neverPaid.slice(0, 60).map(r => r.customerId);
+    const allValidIds = [...new Set(all.map(p => p.customer).filter(Boolean))];
+    const topIdsRec   = allValidIds.slice(0, 60);
+    const allIdsToFetch = [...new Set([...topIdsInad, ...topIdsRec])];
+    const customers = await enrichCustomers(allIdsToFetch);
+    _cache.customers = customers;
+
+    // Aplicar nomes nos neverPaid
+    neverPaid.forEach(r => {
+      const c = customers[r.customerId];
+      if (c) { r.nome = c.name; r.phone = c.phone; r.cpfCnpj = c.cpfCnpj; }
+    });
     _cache.neverPaid = neverPaid;
 
-    // 3. Processar receita
+    // 4. Processar receita
     const rec = processReceita(all);
     _cache.receitaMensal = rec.receitaMensal;
 
-    // 4. Enrich com limite configurado
-    setStatus('loading', 'Buscando nomes dos clientes...');
-    await runEnrichAndRenderClientes();
+    // 5. Processar clientes (usa customers já buscados + todos os IDs válidos)
+    const allCustomerIds = allValidIds;
+    // Para aba clientes: enrich de mais 60 clientes adicionais se necessário
+    const extraIds = allCustomerIds.filter(id => !customers[id]).slice(0, 60);
+    if (extraIds.length) {
+      const extra = await enrichCustomers(extraIds);
+      Object.assign(customers, extra);
+    }
+    const cliData = processClientes(all, customers);
+    _cache.clientes = cliData.clientes;
 
-    // 5. Renderizar aba inadimplência
-    const totalOverdueGeral = overdue.reduce((s,p) => s+(p.value||0), 0);
-    renderKPIsInad(all.length, totalOverdueGeral, neverPaid.length, totalNunca);
+    // 6. Renderizar tudo
+    setStatus('loading', 'Renderizando...');
+
+    // Aba inadimplência
+    renderKPIsInad(all.length, totalAberto, neverPaid.length, totalAberto);
     const byMonth = renderBars(neverPaid);
     renderDonut(neverPaid);
+    renderDebtors(neverPaid);
     renderPriorities(neverPaid);
     renderAlert(neverPaid, byMonth);
 
-    // 6. Renderizar aba receita
+    // Aba receita
     renderKPIsReceita(rec);
     renderReceitaChart(rec.receitaMensal);
-    renderComposicao(rec, neverPaid, totalNunca);
+    renderTopPagadores(cliData.clientes);
+    renderComposicao(rec, neverPaid);
+
+    // Aba clientes
+    renderKPIsClientes(cliData);
+    renderClientesTabela(cliData.clientes, 'todos');
 
     // Footer
     const now2 = new Date().toLocaleString('pt-BR');
@@ -1838,222 +1457,6 @@ async function loadData() {
     document.getElementById('ref-icon').textContent = '↻';
   }
 }
-
-/* ═══ BLOCO: MODAL CLIENTE ═══ */
-let _modalClienteId = null;
-let _modalFaturas   = [];
-
-function openClienteModal(customerId) {
-  _modalClienteId = customerId;
-
-  // Dados do cliente
-  const cli = _cache.clientes.find(c => c.customerId === customerId);
-  const info = _cache.customers[customerId] || {};
-  const faturas = _cache.all
-    .filter(p => p.customer === customerId)
-    .sort((a, b) => (b.dueDate || '').localeCompare(a.dueDate || ''));
-  _modalFaturas = faturas;
-
-  // Header
-  document.getElementById('modal-nome').textContent = info.name || cli?.nome || '—';
-  document.getElementById('modal-phone').textContent = info.phone || cli?.phone || '—';
-  document.getElementById('modal-cpf').textContent = info.cpfCnpj || '—';
-
-  // Status pill
-  const pillMap = {
-    ativo:    ['pill-ativo',    'Ativo'],
-    overdue:  ['pill-overdue',  'Em atraso'],
-    churn:    ['pill-churn',    'Churn'],
-    fantasma: ['pill-fantasma', 'Fantasma'],
-  };
-  const [pillCls, pillLabel] = pillMap[cli?.status || 'fantasma'] || ['','—'];
-  document.getElementById('modal-status-pill').innerHTML =
-    `<span class="status-pill ${pillCls}">${pillLabel}</span>`;
-
-  // Tempo de casa
-  const primeira = cli?.primeira || faturas[faturas.length-1]?.dueDate || '';
-  if (primeira) {
-    const d0 = new Date(primeira);
-    const now = new Date();
-    const meses = (now.getFullYear() - d0.getFullYear()) * 12 + (now.getMonth() - d0.getMonth());
-    document.getElementById('modal-tempo').textContent =
-      meses <= 0 ? 'Menos de 1 mês' : meses === 1 ? '1 mês de casa' : `${meses} meses de casa`;
-  } else {
-    document.getElementById('modal-tempo').textContent = '—';
-  }
-
-  // KPIs
-  const totalPago   = faturas.filter(p => ['RECEIVED','CONFIRMED','RECEIVED_IN_CASH'].includes(p.status))
-                             .reduce((s,p) => s+(p.value||0), 0);
-  const totalAberto = faturas.filter(p => p.status === 'OVERDUE')
-                             .reduce((s,p) => s+(p.value||0), 0);
-  document.getElementById('mk1').textContent = toR(totalPago);
-  document.getElementById('mk2').textContent = toR(totalAberto);
-  document.getElementById('mk3').textContent = faturas.length;
-  document.getElementById('mk4').textContent = faturas[0]?.dueDate || '—';
-
-  // Timeline
-  renderModalTimeline(faturas);
-
-  // Tabela faturas
-  renderModalFaturas(faturas);
-
-  // Abrir
-  const ov = document.getElementById('modal-overlay');
-  ov.classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function renderModalTimeline(faturas) {
-  const tl = document.getElementById('modal-timeline');
-  tl.innerHTML = '';
-  if (!faturas.length) return;
-
-  // Montar mapa de meses
-  const byMonth = {};
-  for (const p of faturas) {
-    if (!p.dueDate) continue;
-    const k = p.dueDate.slice(0,7);
-    if (!byMonth[k]) byMonth[k] = { pago: 0, aberto: 0 };
-    if (['RECEIVED','CONFIRMED','RECEIVED_IN_CASH'].includes(p.status)) byMonth[k].pago++;
-    else if (p.status === 'OVERDUE') byMonth[k].aberto++;
-  }
-
-  // Range do 1º até hoje
-  const datas = Object.keys(byMonth).sort();
-  if (!datas.length) return;
-  const [y0, m0] = datas[0].split('-').map(Number);
-  const now = new Date();
-  const meses = [];
-  let y = y0, m = m0;
-  while (y < now.getFullYear() || (y === now.getFullYear() && m <= now.getMonth()+1)) {
-    const k = `${y}-${String(m).padStart(2,'0')}`;
-    meses.push(k);
-    m++; if (m > 12) { m = 1; y++; }
-    if (meses.length > 36) break; // max 3 anos
-  }
-
-  meses.forEach(k => {
-    const v = byMonth[k];
-    let cls = 'vazio';
-    if (v) {
-      if (v.pago > 0 && v.aberto > 0) cls = 'misto';
-      else if (v.pago > 0) cls = 'pago';
-      else cls = 'aberto';
-    }
-    const [, mm] = k.split('-');
-    const div = document.createElement('div');
-    div.className = 'tl-month';
-    div.title = `${mesLabel(k)}: ${v ? `${v.pago} pago(s), ${v.aberto} em aberto` : 'sem fatura'}`;
-    div.innerHTML = `<div class="tl-bar ${cls}"></div><div class="tl-label">${MN[+mm-1].slice(0,3)}</div>`;
-    tl.appendChild(div);
-  });
-}
-
-function renderModalFaturas(faturas) {
-  const tbody = document.getElementById('modal-faturas-tbody');
-  tbody.innerHTML = '';
-
-  const statusLabel = {
-    RECEIVED:         ['fs-received', 'Recebido'],
-    CONFIRMED:        ['fs-received', 'Confirmado'],
-    RECEIVED_IN_CASH: ['fs-received', 'Recebido (dinheiro)'],
-    OVERDUE:          ['fs-overdue',  'Vencido'],
-    CANCELLED:        ['fs-cancelled','Cancelado'],
-    PENDING:          ['fs-pending',  'Pendente'],
-  };
-
-  faturas.forEach(p => {
-    const [cls, label] = statusLabel[p.status] || ['fs-pending', p.status];
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td style="font-family:var(--font-mono);font-size:11px;">${p.dueDate || '—'}</td>
-      <td style="color:var(--muted);font-size:11px;">${p.description || 'Mensalidade DIM+'}</td>
-      <td><span class="${cls}" style="font-family:var(--font-mono);font-size:10px;">${label}</span></td>
-      <td class="${cls}">${toRFull(p.value || 0)}</td>`;
-    tbody.appendChild(tr);
-  });
-}
-
-function closeModal() {
-  const ov = document.getElementById('modal-overlay');
-  ov.classList.remove('open');
-  document.body.style.overflow = '';
-  _modalClienteId = null;
-}
-
-function handleModalOverlayClick(e) {
-  if (e.target === document.getElementById('modal-overlay')) closeModal();
-}
-
-function exportClienteIndividualCSV() {
-  const info = _cache.customers[_modalClienteId] || {};
-  const nome = info.name || '—';
-  const rows = [['Nome','CPF/CNPJ','Vencimento','Descrição','Status','Valor']];
-  _modalFaturas.forEach(p => {
-    rows.push([
-      nome, info.cpfCnpj || '—',
-      p.dueDate || '—',
-      p.description || 'Mensalidade DIM+',
-      p.status,
-      toRFull(p.value || 0),
-    ]);
-  });
-  const safeName = nome.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-  downloadCSV(`dimplus_cliente_${safeName}.csv`, rows);
-}
-
-// ESC fecha modal
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
-
-/* ── FIM BLOCO MODAL ── */
-
-/* ═══ BLOCO: KPI DRILLDOWN ═══ */
-function kpiDrilldown(tipo) {
-  const filtroMap = { 'todos': 'todos', 'overdue': 'overdue', 'fantasma': 'fantasma' };
-
-  // Navegar para aba clientes
-  const tabBtn = document.querySelector('[onclick*="clientes"]');
-  if (tabBtn) switchTab('clientes', tabBtn);
-
-  setTimeout(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-
-    if (tipo === 'nunca') {
-      // Fantasmas + churn juntos
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      _clientesFiltro = 'nunca';
-      const filtered = _cache.clientes.filter(c => c.status === 'fantasma' || c.status === 'churn');
-      const tbody = document.getElementById('clientes-tbody');
-      tbody.innerHTML = '';
-      const pillMap = {
-        ativo: ['pill-ativo','Ativo'], overdue: ['pill-overdue','Em atraso'],
-        churn: ['pill-churn','Churn'], fantasma: ['pill-fantasma','Fantasma'],
-      };
-      filtered.slice(0, 200).forEach(c => {
-        const [pillCls, pillLabel] = pillMap[c.status] || ['','—'];
-        const tr = document.createElement('tr');
-        tr.style.cursor = 'pointer';
-        tr.onclick = () => openClienteModal(c.customerId);
-        tr.innerHTML = `
-          <td>${c.nome}</td>
-          <td style="font-family:var(--font-mono);font-size:10px;">${c.phone}</td>
-          <td><span class="status-pill ${pillCls}">${pillLabel}</span></td>
-          <td style="font-family:var(--font-mono);font-size:11px;color:var(--muted2);">${c.faturas}</td>
-          <td style="font-family:var(--font-mono);font-size:10px;color:var(--muted);">${c.primeira||'—'}</td>
-          <td>${toR(c.pago)}</td>`;
-        tbody.appendChild(tr);
-      });
-      document.getElementById('clientes-count').textContent =
-        `${filtered.length} clientes · nunca pagaram (fantasmas + churn)`;
-    } else {
-      const filtro = filtroMap[tipo] || 'todos';
-      const btn = document.querySelector(`.filter-btn[onclick*="'${filtro}'"]`);
-      if (btn) filterClientes(filtro, btn);
-    }
-  }, 60);
-}
-/* ── FIM BLOCO KPI DRILLDOWN ── */
 
 /* ═══ BLOCO: INIT ═══ */
 window.addEventListener('DOMContentLoaded', () => {
