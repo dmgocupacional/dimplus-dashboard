@@ -776,7 +776,7 @@ body::before {
 <div class="app">
 
   <div class="hero">
-    <div class="hero-eyebrow">DIM+ Saúde &nbsp;·&nbsp; Painel Executivo &nbsp;·&nbsp; Ao vivo &nbsp;<span class="version-badge">v2.9 · 20/05/2026</span></div>
+    <div class="hero-eyebrow">DIM+ Saúde &nbsp;·&nbsp; Painel Executivo &nbsp;·&nbsp; Ao vivo &nbsp;<span class="version-badge">v3.0 · 20/05/2026</span></div>
     <h1>Dashboard<br><span>DIM+ Saúde</span></h1>
     <div class="hero-sub">Cobranças, inadimplência e receita — dados em tempo real via Asaas.</div>
     <div class="hero-actions">
@@ -905,9 +905,16 @@ body::before {
         <div class="panel-title">
           Top devedores · maior débito
           <div class="panel-actions">
-            <span>nunca pagaram</span>
             <button class="btn-export" onclick="exportDevedoresCSV()">↓ CSV</button>
           </div>
+        </div>
+        <div class="debtor-filters" id="debtor-filters" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
+          <button class="filter-btn active" onclick="filterDevedores('todos',this)">Todos</button>
+          <button class="filter-btn" onclick="filterDevedores('alta',this)">Alta · 6+</button>
+          <button class="filter-btn" onclick="filterDevedores('media',this)">Média · 3–5</button>
+          <button class="filter-btn" onclick="filterDevedores('recentes',this)">Recentes · 1–2</button>
+          <button class="filter-btn" onclick="filterDevedores('fantasma',this)">Fantasmas</button>
+          <button class="filter-btn" onclick="filterDevedores('perdido',this)">Perdidos</button>
         </div>
         <div class="debtor-header">
           <span>Nome</span>
@@ -928,28 +935,28 @@ body::before {
       <div class="panel">
         <div class="panel-title">Plano de ação · limpeza <span>por volume de faturas</span></div>
         <div class="priority-blocks">
-          <div class="priority-block alta">
+          <div class="priority-block alta" onclick="filterDevedoresPrioridade('alta')" style="cursor:pointer;" title="Ver devedores alta prioridade">
             <div class="priority-num" id="pa">—</div>
             <div>
               <div class="priority-title">Alta prioridade</div>
               <div class="priority-desc">6+ faturas. Baixar e bloquear no Asaas imediatamente.</div>
-              <div class="priority-action">→ AÇÃO IMEDIATA</div>
+              <div class="priority-action">→ CLIQUE PARA FILTRAR</div>
             </div>
           </div>
-          <div class="priority-block media">
+          <div class="priority-block media" onclick="filterDevedoresPrioridade('media')" style="cursor:pointer;" title="Ver devedores média prioridade">
             <div class="priority-num" id="pm">—</div>
             <div>
               <div class="priority-title">Média prioridade</div>
               <div class="priority-desc">3–5 faturas. Tentar 1 contato final antes da baixa.</div>
-              <div class="priority-action">→ ÚLTIMO CONTATO</div>
+              <div class="priority-action">→ CLIQUE PARA FILTRAR</div>
             </div>
           </div>
-          <div class="priority-block baixa">
+          <div class="priority-block baixa" onclick="filterDevedoresPrioridade('recentes')" style="cursor:pointer;" title="Ver devedores recentes">
             <div class="priority-num" id="pb">—</div>
             <div>
               <div class="priority-title">Recentes · 1–2 faturas</div>
               <div class="priority-desc">Novos cadastros. Contato urgente ou aguardar 30 dias.</div>
-              <div class="priority-action">→ AVALIAR INDIVIDUALMENTE</div>
+              <div class="priority-action">→ CLIQUE PARA FILTRAR</div>
             </div>
           </div>
         </div>
@@ -1368,8 +1375,11 @@ function processInadimplencia(payments) {
     if (paid) continue;
     const perdido = c.rows.some(p => p.status === 'CANCELLED' || p.deleted);
     const valorOverdue   = c.rows.filter(p => p.status === 'OVERDUE').reduce((s,p) => s+(p.value||0), 0);
-    const valorComJuros  = c.rows.filter(p => p.status === 'OVERDUE').reduce((s,p) =>
-      s+(p.value||0)+(p.fineValue||0)+(p.interestValue||0), 0);
+    const valorComJuros  = c.rows.filter(p => p.status === 'OVERDUE').reduce((s,p) => {
+      const base = p.value || 0;
+      const acr  = calcAcrescimos(p);
+      return s + base + acr;
+    }, 0);
     const valorCancelled = c.rows.filter(p => p.status === 'CANCELLED' || p.deleted).reduce((s,p) => s+(p.value||0), 0);
     const valor = c.rows.reduce((s, p) => s + (p.value || 0), 0);
     const datas = c.rows.map(p => p.dueDate).filter(Boolean).sort();
@@ -1487,6 +1497,31 @@ function processClientes(payments, customersMap) {
 
 /* ═══ BLOCO: HELPERS ═══ */
 const MN = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+
+// Calcula juros/multa localmente a partir dos campos fine/interest + dias em atraso
+function calcAcrescimos(p) {
+  if (!p.dueDate || p.status !== 'OVERDUE') return 0;
+  // Se o Asaas já calculou, usa direto
+  if ((p.fineValue || 0) > 0 || (p.interestValue || 0) > 0) {
+    return (p.fineValue || 0) + (p.interestValue || 0);
+  }
+  const base = p.value || 0;
+  if (!base) return 0;
+  const dias = Math.max(0, Math.floor((Date.now() - new Date(p.dueDate)) / 86400000));
+  if (dias <= 0) return 0;
+  // Multa fixa (% sobre o valor)
+  let multa = 0;
+  if (p.fine && p.fine.value > 0) {
+    multa = p.fine.type === 'PERCENTAGE' ? base * (p.fine.value / 100) : p.fine.value;
+  }
+  // Juros ao mês (pro-rata diário)
+  let juros = 0;
+  if (p.interest && p.interest.value > 0) {
+    const taxaDia = p.interest.type === 'PERCENTAGE' ? (p.interest.value / 100) / 30 : 0;
+    juros = base * taxaDia * dias;
+  }
+  return multa + juros;
+}
 function toR(v) {
   if (v >= 1000000) return 'R$ ' + (v/1000000).toFixed(1).replace('.',',') + 'M';
   if (v >= 1000) return 'R$ ' + (v/1000).toFixed(1).replace('.',',') + 'k';
@@ -1941,8 +1976,7 @@ async function loadData() {
 
     // 5. Renderizar aba inadimplência
     const totalOverdueGeral = overdue.reduce((s,p) => s+(p.value||0), 0);
-    const totalOverdueComJuros = overdue.reduce((s,p) =>
-      s + (p.value||0) + (p.fineValue||0) + (p.interestValue||0), 0);
+    const totalOverdueComJuros = overdue.reduce((s,p) => s+(p.value||0)+calcAcrescimos(p), 0);
     renderKPIsInad(all.length, totalOverdueGeral, totalOverdueComJuros, neverPaid.length, totalNunca, totalCancelled, rec.recMesAtual);
     const byMonth = renderBars(neverPaid);
     renderDonut(neverPaid);
@@ -2020,7 +2054,7 @@ function openClienteModal(customerId) {
   const totalAberto = faturas.filter(p => p.status === 'OVERDUE')
                              .reduce((s,p) => s+(p.value||0), 0);
   const totalAcrescimos = faturas.filter(p => p.status === 'OVERDUE')
-                             .reduce((s,p) => s+(p.fineValue||0)+(p.interestValue||0), 0);
+                             .reduce((s,p) => s + calcAcrescimos(p), 0);
   document.getElementById('mk1').textContent = toR(totalPago);
   document.getElementById('mk2').textContent = toR(totalAberto);
   document.getElementById('mk3').textContent = faturas.length;
@@ -2126,9 +2160,9 @@ function renderModalFaturas(faturas) {
   faturas.forEach(p => {
     const [cls, label] = statusLabel[p.status] || ['fs-pending', p.status];
     const valorOriginal = p.value || 0;
-    const acrescimos = (p.fineValue||0) + (p.interestValue||0);
+    const acrescimos = calcAcrescimos(p);
     const valorAtualizado = valorOriginal + acrescimos;
-    const temJuros = acrescimos > 0;
+    const temJuros = acrescimos > 0.01;
 
     const tr = document.createElement('tr');
     tr.innerHTML = `
@@ -2224,6 +2258,36 @@ function kpiDrilldown(tipo) {
   }, 60);
 }
 /* ── FIM BLOCO KPI DRILLDOWN ── */
+
+/* ═══ BLOCO: FILTROS DEVEDORES ═══ */
+let _devedoresFiltro = 'todos';
+
+function filterDevedores(filtro, btn) {
+  _devedoresFiltro = filtro;
+  document.querySelectorAll('#debtor-filters .filter-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderDevedoresFiltrados();
+}
+
+function filterDevedoresPrioridade(filtro) {
+  _devedoresFiltro = filtro;
+  document.querySelectorAll('#debtor-filters .filter-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.querySelector(`#debtor-filters .filter-btn[onclick*="'${filtro}'"]`);
+  if (btn) btn.classList.add('active');
+  renderDevedoresFiltrados();
+  document.getElementById('debtor-list').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function renderDevedoresFiltrados() {
+  let lista = _cache.neverPaid;
+  if (_devedoresFiltro === 'alta')     lista = lista.filter(d => d.faturas >= 6);
+  else if (_devedoresFiltro === 'media')    lista = lista.filter(d => d.faturas >= 3 && d.faturas < 6);
+  else if (_devedoresFiltro === 'recentes') lista = lista.filter(d => d.faturas < 3);
+  else if (_devedoresFiltro === 'fantasma') lista = lista.filter(d => d.categoria === 'Fantasma');
+  else if (_devedoresFiltro === 'perdido')  lista = lista.filter(d => d.categoria === 'Perdido');
+  renderDebtors(lista);
+}
+/* ── FIM BLOCO FILTROS DEVEDORES ── */
 
 /* ═══ BLOCO: CALCULADORA NEGOCIAÇÃO ═══ */
 function updateNegociacao() {
