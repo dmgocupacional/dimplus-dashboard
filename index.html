@@ -809,7 +809,7 @@ body::before {
 <div class="app">
 
   <div class="hero">
-    <div class="hero-eyebrow">DIM+ Saúde &nbsp;·&nbsp; Painel Executivo &nbsp;·&nbsp; Ao vivo &nbsp;<span class="version-badge">v3.3 · 21/05/2026</span></div>
+    <div class="hero-eyebrow">DIM+ Saúde &nbsp;·&nbsp; Painel Executivo &nbsp;·&nbsp; Ao vivo &nbsp;<span class="version-badge">v3.5 · 21/05/2026</span></div>
     <h1>Dashboard<br><span>DIM+ Saúde</span></h1>
     <div class="hero-sub">Cobranças, inadimplência e receita — dados em tempo real via Asaas.</div>
     <div class="hero-actions">
@@ -1405,19 +1405,39 @@ function setStatus(cls, txt) {
 }
 
 /* ═══ BLOCO: FETCH PAGINADO ═══ */
-async function fetchAll(path, params) {
-  let all = [], offset = 0;
-  while (true) {
-    const qs = new URLSearchParams({ ...params, limit: 100, offset }).toString();
-    const r = await fetch(`${WORKER}${path}?${qs}`);
-    if (!r.ok) throw new Error(`HTTP ${r.status} em ${path}`);
-    const d = await r.json();
-    const items = Array.isArray(d.data) ? d.data : [];
-    all = all.concat(items);
-    if (!d.hasMore || offset > 4900) break;
-    offset += 100;
+async function fetchAll(path, params, maxRecords) {
+  const hardLimit = maxRecords || 5000;
+  const BATCH = 5; // páginas em paralelo
+
+  // Primeira chamada para descobrir total
+  const qs0 = new URLSearchParams({ ...params, limit: 100, offset: 0 }).toString();
+  const r0 = await fetch(`${WORKER}${path}?${qs0}`);
+  if (!r0.ok) throw new Error(`HTTP ${r0.status} em ${path}`);
+  const d0 = await r0.json();
+  const items0 = Array.isArray(d0.data) ? d0.data : [];
+  if (!d0.hasMore || items0.length === 0) return items0;
+
+  // Estimar total de páginas
+  const total = Math.min(d0.totalCount || hardLimit, hardLimit);
+  const totalPages = Math.ceil(total / 100);
+  const offsets = [];
+  for (let i = 1; i < totalPages; i++) offsets.push(i * 100);
+
+  // Buscar em lotes paralelos
+  let all = [...items0];
+  for (let i = 0; i < offsets.length; i += BATCH) {
+    const chunk = offsets.slice(i, i + BATCH);
+    const results = await Promise.all(chunk.map(async offset => {
+      const qs = new URLSearchParams({ ...params, limit: 100, offset }).toString();
+      const r = await fetch(`${WORKER}${path}?${qs}`);
+      if (!r.ok) return [];
+      const d = await r.json();
+      return Array.isArray(d.data) ? d.data : [];
+    }));
+    results.forEach(items => all = all.concat(items));
+    if (all.length >= hardLimit) break;
   }
-  return all;
+  return all.slice(0, hardLimit);
 }
 
 /* ═══ BLOCO: ENRICH SELECTOR ═══ */
@@ -2079,15 +2099,16 @@ async function loadData() {
     const totalOverdueGeral    = overdue.reduce((s,p) => s+(p.value||0), 0);
     const totalOverdueComJuros = overdue.reduce((s,p) => s+(p.value||0)+calcAcrescimos(p), 0);
     const recParcial = processReceita(allSemCancelled);
-    renderKPIsInad(allSemCancelled.length + '…', totalOverdueGeral, totalOverdueComJuros, neverPaidParcial.length, totalNuncaParcial, totalCancelledParcial, recParcial.recMesAtual);
+    renderKPIsInad(allSemCancelled.length, totalOverdueGeral, totalOverdueComJuros, neverPaidParcial.length, totalNuncaParcial, totalCancelledParcial, recParcial.recMesAtual);
     const byMonthParcial = renderBars(neverPaidParcial);
     renderDonut(neverPaidParcial);
     renderPriorities(neverPaidParcial);
     renderAlert(neverPaidParcial, byMonthParcial);
     setStatus('loading', 'Buscando cancelados...');
 
-    // 2. Buscar CANCELLED em background
-    const cancelled = await fetchAll('/payments', { status: 'CANCELLED' });
+    // 2. Buscar CANCELLED limitado a 500 (os mais recentes bastam para identificar neverPaid)
+    setStatus('loading', 'Buscando cancelados (últimos 500)...');
+    const cancelled = await fetchAll('/payments', { status: 'CANCELLED' }, 500);
     const all = [...allSemCancelled, ...cancelled];
     _cache.all = all;
     _cache.customers = {};
@@ -2513,16 +2534,17 @@ let _negFiltro = 'todos';
 
 async function loadNegativados() {
   const tbody = document.getElementById('neg-tbody');
-  tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px;font-family:var(--font-mono);font-size:11px;">⏳ Carregando negativações...</td></tr>`;
+  tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px;font-family:var(--font-mono);font-size:11px;">⏳ Carregando negativações...</td></tr>`;
 
   try {
     const dunnings = await fetchAll('/paymentDunnings', {});
 
-    // Enrich: buscar customer info dos IDs únicos
+    // Enrich forçado — busca mesmo que já tenha no cache
     const customerIds = [...new Set(dunnings.map(d => d.customer).filter(Boolean))];
-    const missing = customerIds.filter(id => !_cache.customers[id]);
-    if (missing.length > 0) {
-      const enriched = await enrichCustomers(missing.slice(0, 80));
+    if (customerIds.length > 0) {
+      setStatus('loading', `Buscando nomes de ${customerIds.length} clientes negativados...`);
+      const enriched = await enrichCustomers(customerIds.slice(0, 100),
+        (done, total) => setStatus('loading', `Negativados: ${done}/${total} nomes...`));
       Object.assign(_cache.customers, enriched);
     }
 
@@ -2535,8 +2557,10 @@ async function loadNegativados() {
     _cache.negativados = dunnings;
     renderNegativados(dunnings);
     renderKPIsNeg(dunnings);
+    setStatus('live', `${_cache.all.length} faturas · dados ao vivo`);
   } catch (err) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--red);padding:20px;font-family:var(--font-mono);font-size:11px;">Erro: ${err.message}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--red);padding:20px;font-family:var(--font-mono);font-size:11px;">Erro: ${err.message}</td></tr>`;
+    setStatus('error', err.message);
   }
 }
 
