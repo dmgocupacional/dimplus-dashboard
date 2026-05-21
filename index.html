@@ -927,7 +927,7 @@ body::before {
 <div class="app">
 
   <div class="hero">
-    <div class="hero-eyebrow">DIM+ Saúde &nbsp;·&nbsp; Painel Executivo &nbsp;·&nbsp; Ao vivo &nbsp;<span class="version-badge">v4.7 · 21/05/2026</span></div>
+    <div class="hero-eyebrow">DIM+ Saúde &nbsp;·&nbsp; Painel Executivo &nbsp;·&nbsp; Ao vivo &nbsp;<span class="version-badge">v4.8 · 21/05/2026</span></div>
     <h1>Dashboard<br><span>DIM+ Saúde</span></h1>
     <div class="hero-sub">Cobranças, inadimplência e receita — dados em tempo real via Asaas.</div>
     <div class="hero-actions">
@@ -1575,7 +1575,16 @@ body::before {
           <button class="btn-export" onclick="exportHistoricoCSV()">↓ CSV</button>
         </div>
       </div>
-      <div id="hist-lista" style="display:flex;flex-direction:column;gap:6px;max-height:500px;overflow-y:auto;"></div>
+      <div id="hist-lista" style="display:flex;flex-direction:column;gap:6px;max-height:500px;overflow-y:auto;">
+        <!-- Header -->
+        <div style="display:grid;grid-template-columns:130px 100px 140px 1fr auto;gap:10px;padding:6px 12px;border-bottom:1px solid var(--border2);margin-bottom:2px;">
+          <span style="font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);">Data/Hora</span>
+          <span style="font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);">Vendedora</span>
+          <span style="font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);">Cliente</span>
+          <span style="font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);">Observação</span>
+          <span style="font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);">Status</span>
+        </div>
+      </div>
       <div id="hist-mais-btn" style="margin-top:10px;text-align:center;display:none;">
         <button class="filter-btn" onclick="renderHistoricoMais()" style="padding:8px 20px;">Carregar mais</button>
       </div>
@@ -3799,7 +3808,10 @@ function _getHistoricoFiltrado() {
 
 function _renderHistoricoPage(reset) {
   const lista = document.getElementById('hist-lista');
-  if (reset) lista.innerHTML = '';
+  if (reset) {
+    // Manter só o header (primeiro filho)
+    while (lista.children.length > 1) lista.removeChild(lista.lastChild);
+  }
   const all = _getHistoricoFiltrado();
   const page = all.slice(_histOffset, _histOffset + HIST_PAGE);
 
