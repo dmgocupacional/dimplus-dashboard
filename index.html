@@ -809,7 +809,7 @@ body::before {
 <div class="app">
 
   <div class="hero">
-    <div class="hero-eyebrow">DIM+ Saúde &nbsp;·&nbsp; Painel Executivo &nbsp;·&nbsp; Ao vivo &nbsp;<span class="version-badge">v3.7 · 21/05/2026</span></div>
+    <div class="hero-eyebrow">DIM+ Saúde &nbsp;·&nbsp; Painel Executivo &nbsp;·&nbsp; Ao vivo &nbsp;<span class="version-badge">v3.8 · 21/05/2026</span></div>
     <h1>Dashboard<br><span>DIM+ Saúde</span></h1>
     <div class="hero-sub">Cobranças, inadimplência e receita — dados em tempo real via Asaas.</div>
     <div class="hero-actions">
@@ -950,10 +950,11 @@ body::before {
           <button class="filter-btn" onclick="filterDevedores('fantasma',this)">Fantasmas</button>
           <button class="filter-btn" onclick="filterDevedores('perdido',this)">Perdidos</button>
         </div>
-        <div class="debtor-header">
+        <div class="debtor-header" style="grid-template-columns:1fr 50px 90px 90px 80px 76px;">
           <span>Nome</span>
           <span style="text-align:center">Faturas</span>
           <span style="text-align:right">Telefone</span>
+          <span style="text-align:right">E-mail</span>
           <span style="text-align:right">Valor</span>
           <span style="text-align:center">Tipo</span>
         </div>
@@ -1144,6 +1145,7 @@ body::before {
             <tr>
               <th>Nome</th>
               <th>Telefone</th>
+              <th>E-mail</th>
               <th>Status</th>
               <th>Faturas</th>
               <th>1ª Fatura</th>
@@ -1151,7 +1153,7 @@ body::before {
             </tr>
           </thead>
           <tbody id="clientes-tbody">
-            <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px;font-family:var(--font-mono);font-size:11px;">Carregando...</td></tr>
+            <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px;font-family:var(--font-mono);font-size:11px;">Carregando...</td></tr>
           </tbody>
         </table>
       </div>
@@ -1211,6 +1213,7 @@ body::before {
               <th>Nome</th>
               <th>CPF/CNPJ</th>
               <th>Telefone</th>
+              <th>E-mail</th>
               <th>Tipo</th>
               <th>Status</th>
               <th>Valor</th>
@@ -1243,6 +1246,8 @@ body::before {
         <div class="modal-name" id="modal-nome">—</div>
         <div class="modal-meta">
           <span id="modal-phone">—</span>
+          <span>·</span>
+          <span id="modal-email" style="color:var(--muted);">—</span>
           <span>·</span>
           <span id="modal-cpf">—</span>
           <span>·</span>
@@ -1623,6 +1628,7 @@ function processClientes(payments, customersMap) {
       customerId: cid,
       nome: info.name || '—',
       phone: info.phone || '—',
+      email: info.email || '—',
       status, faturas: c.rows.length,
       primeira, pago: c.pago,
     });
@@ -1773,14 +1779,13 @@ function renderDonut(neverPaid) {
 function renderDebtors(neverPaid) {
   const dl = document.getElementById('debtor-list');
   dl.innerHTML = '';
-  // Ordenar por valorOverdue desc, depois por valor total desc
   const sorted = [...neverPaid].sort((a, b) => (b.valorOverdue - a.valorOverdue) || (b.valor - a.valor));
   const top = sorted.slice(0, 20);
   if (!top.length) { dl.innerHTML = '<p style="color:var(--muted);font-size:12px;">Sem dados neste filtro.</p>'; return; }
   top.forEach(d => {
     const row = document.createElement('div');
     row.className = 'debtor-row';
-    row.style.cursor = 'pointer';
+    row.style.cssText = 'cursor:pointer;grid-template-columns:1fr 50px 90px 90px 80px 76px;';
     row.title = 'Clique para ver faturas';
     row.onclick = () => openClienteModal(d.customerId);
     const tag = d.categoria === 'Perdido' ? 'tag-lost' : 'tag-ghost';
@@ -1796,6 +1801,7 @@ function renderDebtors(neverPaid) {
       <div class="debtor-name" title="${d.nome}">${d.nome}</div>
       <div class="debtor-fat">${d.faturas}×</div>
       <div class="debtor-phone">${d.phone}</div>
+      <div class="debtor-phone" style="font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${d.email||'—'}">${d.email||'—'}</div>
       <div>${valorHtml}</div>
       <div><span class="debtor-tag ${tag}">${d.categoria}</span></div>`;
     dl.appendChild(row);
@@ -1944,7 +1950,7 @@ function renderClientesTabela(clientes, filtro) {
   const show = filtered.slice(0, 200);
 
   if (!show.length) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px;font-family:var(--font-mono);font-size:11px;">Nenhum cliente nesta categoria.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px;font-family:var(--font-mono);font-size:11px;">Nenhum cliente nesta categoria.</td></tr>`;
     document.getElementById('clientes-count').textContent = '';
     return;
   }
@@ -1965,6 +1971,7 @@ function renderClientesTabela(clientes, filtro) {
     tr.innerHTML = `
       <td>${c.nome}</td>
       <td style="font-family:var(--font-mono);font-size:10px;">${c.phone}</td>
+      <td style="font-family:var(--font-mono);font-size:10px;color:var(--muted);">${c.email}</td>
       <td><span class="status-pill ${pillCls}">${pillLabel}</span></td>
       <td style="font-family:var(--font-mono);font-size:11px;color:var(--muted2);">${c.faturas}</td>
       <td style="font-family:var(--font-mono);font-size:10px;color:var(--muted);">${c.primeira || '—'}</td>
@@ -2053,7 +2060,7 @@ async function runEnrichAndRenderClientes() {
   // Aplicar nomes nos neverPaid
   _cache.neverPaid.forEach(r => {
     const c = _cache.customers[r.customerId];
-    if (c) { r.nome = c.name; r.phone = c.phone; r.cpfCnpj = c.cpfCnpj; }
+    if (c) { r.nome = c.name; r.phone = c.phone; r.cpfCnpj = c.cpfCnpj; r.email = c.email; }
   });
 
   // Re-processar clientes com customers atualizados
@@ -2177,6 +2184,7 @@ function openClienteModal(customerId) {
   // Header
   document.getElementById('modal-nome').textContent = info.name || cli?.nome || '—';
   document.getElementById('modal-phone').textContent = info.phone || cli?.phone || '—';
+  document.getElementById('modal-email').textContent = info.email || '—';
   document.getElementById('modal-cpf').textContent = info.cpfCnpj || '—';
 
   // Status pill
@@ -2216,15 +2224,14 @@ function openClienteModal(customerId) {
   document.getElementById('mk3').textContent = faturas.length;
   document.getElementById('mk4').textContent = faturas[0]?.dueDate || '—';
 
-  // Calculadora de negociação
+  // Calculadora de negociação — mostrar sempre que houver OVERDUE
   const negBox = document.getElementById('neg-box');
-  if (totalAcrescimos > 0.01) {
+  if (totalAberto > 0) {
     negBox.style.display = 'block';
     document.getElementById('neg-original').textContent = toRFull(totalAberto);
-    document.getElementById('neg-juros').textContent    = toRFull(totalAcrescimos);
+    document.getElementById('neg-juros').textContent    = totalAcrescimos > 0.01 ? toRFull(totalAcrescimos) : 'R$ 0,00';
     document.getElementById('neg-total').textContent    = toRFull(totalAberto + totalAcrescimos);
     document.getElementById('neg-slider').value = 100;
-    // Reset presets
     document.querySelectorAll('.neg-preset-btn').forEach(b => b.classList.remove('active'));
     document.querySelector('.neg-preset-btn').classList.add('active');
     window._negOriginal    = totalAberto;
@@ -2637,7 +2644,7 @@ function _renderNegTabela(list) {
   tbody.innerHTML = '';
 
   if (!list.length) {
-    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px;font-family:var(--font-mono);font-size:11px;">Nenhum registro neste filtro.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px;font-family:var(--font-mono);font-size:11px;">Nenhum registro neste filtro.</td></tr>`;
     document.getElementById('neg-count').textContent = '';
     return;
   }
@@ -2650,12 +2657,19 @@ function _renderNegTabela(list) {
     const nome  = d._nome || d.customerName || '—';
     const cpf   = d._cpf  || d.customerCpfCnpj || '—';
     const phone = d._phone || '—';
+    const email = _cache.customers[d._customerId]?.email || '—';
 
     const tr = document.createElement('tr');
+    tr.style.cursor = d._customerId ? 'pointer' : 'default';
+    if (d._customerId) {
+      tr.title = 'Clique para ver faturas';
+      tr.onclick = () => openClienteModal(d._customerId);
+    }
     tr.innerHTML = `
       <td>${nome}</td>
       <td style="font-family:var(--font-mono);font-size:10px;">${cpf}</td>
       <td style="font-family:var(--font-mono);font-size:10px;color:var(--muted);">${phone}</td>
+      <td style="font-family:var(--font-mono);font-size:10px;color:var(--muted);">${email}</td>
       <td style="font-family:var(--font-mono);font-size:10px;color:var(--muted2);">${tipo}</td>
       <td><span class="status-pill ${pillCls}">${pillLabel}</span></td>
       <td style="font-family:var(--font-mono);font-size:11px;color:var(--gold);text-align:right;">${toR(valor)}</td>
