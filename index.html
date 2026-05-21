@@ -927,7 +927,7 @@ body::before {
 <div class="app">
 
   <div class="hero">
-    <div class="hero-eyebrow">DIM+ Saúde &nbsp;·&nbsp; Painel Executivo &nbsp;·&nbsp; Ao vivo &nbsp;<span class="version-badge">v4.0 · 21/05/2026</span></div>
+    <div class="hero-eyebrow">DIM+ Saúde &nbsp;·&nbsp; Painel Executivo &nbsp;·&nbsp; Ao vivo &nbsp;<span class="version-badge">v4.1 · 21/05/2026</span></div>
     <h1>Dashboard<br><span>DIM+ Saúde</span></h1>
     <div class="hero-sub">Cobranças, inadimplência e receita — dados em tempo real via Asaas.</div>
     <div class="hero-actions">
@@ -949,6 +949,7 @@ body::before {
     <button class="tab-btn" onclick="switchTab('clientes', this)">Clientes</button>
     <button class="tab-btn" onclick="switchTab('negativados', this)">Negativados</button>
     <button class="tab-btn" onclick="switchTab('tratativas', this)">Tratativas</button>
+    <button class="tab-btn" onclick="switchTab('produtividade', this)">Produtividade</button>
   </nav>
 
   <!-- ═══ ABA: INADIMPLÊNCIA ═══ -->
@@ -1359,14 +1360,14 @@ body::before {
         <div class="kpi-foot">registros de contato</div>
       </div>
       <div class="kpi-cell c-green">
-        <div class="kpi-label">Acordos feitos</div>
+        <div class="kpi-label">Acordos/Boletos</div>
         <div class="kpi-value c-green" id="tr2">—</div>
-        <div class="kpi-foot">aguardando pagamento</div>
+        <div class="kpi-foot">em andamento</div>
       </div>
       <div class="kpi-cell c-amber">
         <div class="kpi-label">Aguardando retorno</div>
         <div class="kpi-value c-amber" id="tr3">—</div>
-        <div class="kpi-foot">clientes pendentes</div>
+        <div class="kpi-foot">pendentes</div>
       </div>
       <div class="kpi-cell c-red">
         <div class="kpi-label">Sem sucesso</div>
@@ -1376,49 +1377,179 @@ body::before {
       <div class="kpi-cell c-gold">
         <div class="kpi-label">A negativar</div>
         <div class="kpi-value c-gold" id="tr5">—</div>
-        <div class="kpi-foot">recomendados para negat.</div>
+        <div class="kpi-foot">recomendados</div>
       </div>
     </div>
 
     <div class="panel full-grid">
-      <div class="panel-title">
-        Histórico de tratativas
-        <div class="panel-actions">
-          <div class="trat-filters" style="margin:0;" id="trat-filters">
-            <button class="filter-btn active" onclick="filterTratativas('todos',this)">Todos</button>
-            <button class="filter-btn" onclick="filterTratativas('Sandra',this)">Sandra</button>
-            <button class="filter-btn" onclick="filterTratativas('Rayane',this)">Rayane</button>
-            <button class="filter-btn" onclick="filterTratativas('Mirella',this)">Mirella</button>
-            <button class="filter-btn" onclick="filterTratativas('Acordo feito',this)">Acordos</button>
-            <button class="filter-btn" onclick="filterTratativas('Boleto enviado',this)">Boleto enviado</button>
-            <button class="filter-btn" onclick="filterTratativas('pendentes',this)" style="border-color:var(--accent2);color:var(--accent2);">⚠ Pendentes pagamento</button>
-            <button class="filter-btn" onclick="filterTratativas('Negativar',this)">A negativar</button>
-          </div>
-          <button class="btn-export" onclick="exportTratativasCSV()">↓ CSV</button>
+      <!-- Buscador + Filtros -->
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;">
+        <div style="position:relative;flex:1;min-width:200px;">
+          <input type="text" id="trat-busca"
+            placeholder="Buscar por nome, CPF, telefone..."
+            oninput="aplicarFiltrosTratativas()"
+            style="width:100%;background:var(--surface3);border:1px solid var(--border2);border-radius:8px;padding:9px 12px 9px 34px;font-family:var(--font-mono);font-size:12px;color:var(--text);outline:none;">
+          <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;">🔍</span>
         </div>
+        <select id="trat-fil-vendedora" onchange="aplicarFiltrosTratativas()" class="trat-select" style="width:auto;padding:9px 12px;">
+          <option value="">Todas vendedoras</option>
+          <option value="Sandra">Sandra</option>
+          <option value="Rayane">Rayane</option>
+          <option value="Mirella">Mirella</option>
+        </select>
+        <select id="trat-fil-status" onchange="aplicarFiltrosTratativas()" class="trat-select" style="width:auto;padding:9px 12px;">
+          <option value="">Todos os status</option>
+          <option value="Tentativa de contato">Tentativa de contato</option>
+          <option value="Aguardando retorno">Aguardando retorno</option>
+          <option value="Acordo feito">Acordo feito</option>
+          <option value="Boleto enviado">Boleto enviado</option>
+          <option value="Sem sucesso">Sem sucesso</option>
+          <option value="Negativar">Negativar</option>
+          <option value="Resolvido">Resolvido</option>
+          <option value="pendentes">⚠ Acordos pendentes pagamento</option>
+          <option value="sem_tratativa">— Sem tratativa</option>
+        </select>
+        <select id="trat-fil-periodo" onchange="aplicarFiltrosTratativas()" class="trat-select" style="width:auto;padding:9px 12px;">
+          <option value="todos">Todos os períodos</option>
+          <option value="hoje">Hoje</option>
+          <option value="semana">Esta semana</option>
+          <option value="mes">Este mês</option>
+        </select>
+        <button class="btn-export" onclick="exportTratativasCSV()" style="white-space:nowrap;">↓ CSV</button>
       </div>
+
+      <!-- Tabela operacional -->
       <div style="overflow-x:auto;">
         <table class="trat-table" id="trat-table">
           <thead>
             <tr>
               <th>Cliente</th>
+              <th>CPF</th>
               <th>Telefone</th>
+              <th>Valor em aberto</th>
+              <th>Prioridade</th>
+              <th>Último contato</th>
+              <th>Status tratativa</th>
               <th>Vendedora</th>
-              <th>Status</th>
               <th>Observação</th>
-              <th>Valor acordo</th>
-              <th>Data</th>
+              <th style="text-align:center;">Ação</th>
             </tr>
           </thead>
           <tbody id="trat-tbody">
-            <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px;font-family:var(--font-mono);font-size:11px;">Clique na aba para carregar.</td></tr>
+            <tr><td colspan="10" style="text-align:center;color:var(--muted);padding:20px;font-family:var(--font-mono);font-size:11px;">Clique na aba para carregar.</td></tr>
           </tbody>
         </table>
       </div>
       <div id="trat-count" style="margin-top:10px;font-family:var(--font-mono);font-size:10px;color:var(--muted);"></div>
     </div>
 
+    <!-- Popover de nova tratativa inline -->
+    <div id="trat-popover" style="display:none;position:fixed;z-index:400;background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:16px;width:320px;box-shadow:0 8px 32px rgba(0,40,20,.18);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div style="font-family:var(--font-display);font-size:14px;font-weight:700;font-style:italic;" id="pop-nome">—</div>
+        <button onclick="fecharPopover()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:16px;">✕</button>
+      </div>
+      <div class="trat-field" style="margin-bottom:10px;">
+        <span class="trat-label">Vendedora</span>
+        <select class="trat-select" id="pop-vendedora">
+          <option value="">Selecione...</option>
+          <option value="Sandra">Sandra</option>
+          <option value="Rayane">Rayane</option>
+          <option value="Mirella">Mirella</option>
+        </select>
+      </div>
+      <div class="trat-field" style="margin-bottom:10px;">
+        <span class="trat-label">Status</span>
+        <select class="trat-select" id="pop-status" onchange="togglePopAcordo()">
+          <option value="">Selecione...</option>
+          <option value="Tentativa de contato">Tentativa de contato</option>
+          <option value="Aguardando retorno">Aguardando retorno</option>
+          <option value="Acordo feito">Acordo feito ✓</option>
+          <option value="Boleto enviado">Boleto enviado 📄</option>
+          <option value="Sem sucesso">Sem sucesso</option>
+          <option value="Negativar">Negativar ⚠</option>
+        </select>
+      </div>
+      <div class="trat-field" id="pop-acordo-field" style="margin-bottom:10px;display:none;">
+        <span class="trat-label">Valor do acordo (R$)</span>
+        <input type="number" class="trat-input-valor" id="pop-valor" placeholder="0,00" step="0.01" min="0">
+      </div>
+      <div class="trat-field" style="margin-bottom:12px;">
+        <span class="trat-label">Observação</span>
+        <textarea class="trat-textarea" id="pop-obs" placeholder="Detalhes do contato..." style="min-height:60px;"></textarea>
+      </div>
+      <button class="trat-btn-salvar" id="pop-btn-salvar" onclick="salvarPopover()" style="padding:10px;">Salvar</button>
+      <div id="pop-error" style="display:none;color:var(--red);font-family:var(--font-mono);font-size:10px;margin-top:6px;"></div>
+    </div>
+
   </div><!-- /tab-tratativas -->
+
+  <!-- ═══ ABA: PRODUTIVIDADE ═══ -->
+  <div class="tab-pane" id="tab-produtividade">
+
+    <!-- Período selector -->
+    <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center;">
+      <span style="font-family:var(--font-mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;">Período:</span>
+      <button class="filter-btn active" onclick="setProdPeriodo('mes',this)" id="prod-per-mes">Este mês</button>
+      <button class="filter-btn" onclick="setProdPeriodo('semana',this)">Esta semana</button>
+      <button class="filter-btn" onclick="setProdPeriodo('todos',this)">Histórico total</button>
+    </div>
+
+    <!-- KPIs gerais -->
+    <div class="kpi-strip" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px;" id="prod-kpi-strip">
+      <div class="kpi-cell c-teal">
+        <div class="kpi-label">Contatos realizados</div>
+        <div class="kpi-value c-teal" id="pk1">—</div>
+        <div class="kpi-foot" id="pk1f">no período</div>
+      </div>
+      <div class="kpi-cell c-green">
+        <div class="kpi-label">Acordos fechados</div>
+        <div class="kpi-value c-green" id="pk2">—</div>
+        <div class="kpi-foot">valor em acordos</div>
+      </div>
+      <div class="kpi-cell c-gold">
+        <div class="kpi-label">Valor recuperado</div>
+        <div class="kpi-value c-gold" id="pk3">—</div>
+        <div class="kpi-foot">resolvidos no período</div>
+      </div>
+      <div class="kpi-cell c-amber">
+        <div class="kpi-label">Taxa de conversão</div>
+        <div class="kpi-value c-amber" id="pk4">—</div>
+        <div class="kpi-foot">contatos → acordos</div>
+      </div>
+    </div>
+
+    <div class="two-grid" style="margin-bottom:16px;">
+      <!-- Ranking vendedoras -->
+      <div class="panel">
+        <div class="panel-title">Ranking de vendedoras <span id="prod-periodo-label">este mês</span></div>
+        <div id="prod-ranking" style="display:flex;flex-direction:column;gap:12px;">
+          <div class="skeleton" style="height:60px;"></div>
+          <div class="skeleton" style="height:60px;"></div>
+          <div class="skeleton" style="height:60px;"></div>
+        </div>
+      </div>
+
+      <!-- Funil de conversão -->
+      <div class="panel">
+        <div class="panel-title">Funil de tratativas</div>
+        <div id="prod-funil" style="display:flex;flex-direction:column;gap:8px;">
+          <div class="skeleton" style="height:32px;"></div>
+          <div class="skeleton" style="height:28px;width:85%;"></div>
+          <div class="skeleton" style="height:24px;width:70%;"></div>
+          <div class="skeleton" style="height:20px;width:55%;"></div>
+          <div class="skeleton" style="height:16px;width:40%;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contatos por dia -->
+    <div class="panel full-grid">
+      <div class="panel-title">Contatos por dia — últimos 14 dias</div>
+      <div id="prod-timeline" style="display:flex;flex-direction:column;gap:6px;"></div>
+    </div>
+
+  </div><!-- /tab-produtividade -->
 
   <div class="footer">
     <div class="footer-brand">DIM<span>+</span> Saúde</div>
@@ -1663,6 +1794,7 @@ function switchTab(name, btn) {
   btn.classList.add('active');
   if (name === 'negativados' && _cache.negativados.length === 0 && WORKER) loadNegativados();
   if (name === 'tratativas') loadTratativas();
+  if (name === 'produtividade') renderProdutividade();
 }
 
 /* ═══ BLOCO: STATUS ═══ */
@@ -3027,15 +3159,12 @@ async function loadTratativas() {
     _tratativasMap = {};
     _tratativas.forEach(t => {
       if (!_tratativasMap[t.customer_id]) {
-        _tratativasMap[t.customer_id] = t; // já está ordenado por created_at desc
+        _tratativasMap[t.customer_id] = t;
       }
     });
 
-    // Detectar resolvidos automaticamente: tinha "Acordo feito" ou "Boleto enviado"
-    // mas não tem mais OVERDUE no cache → marcar como Resolvido
     await detectarResolvidos();
-
-    renderTratativas(_tratativas);
+    aplicarFiltrosTratativas();
     renderKPIsTrat(_tratativas);
   } catch(err) {
     document.getElementById('trat-tbody').innerHTML =
@@ -3094,47 +3223,202 @@ function renderKPIsTrat(list) {
 function renderTratativas(list) {
   const tbody = document.getElementById('trat-tbody');
   tbody.innerHTML = '';
-  if (!list.length) {
-    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px;font-family:var(--font-mono);font-size:11px;">Nenhuma tratativa registrada.</td></tr>`;
+
+  // Montar lista operacional: clientes do cache + dados de tratativa
+  // "list" pode ser filtrado ou ser a lista de clientes sem tratativa
+  const rows = list;
+
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:20px;font-family:var(--font-mono);font-size:11px;">Nenhum registro encontrado.</td></tr>`;
     document.getElementById('trat-count').textContent = '';
     return;
   }
-  list.forEach(t => {
+
+  rows.forEach(t => {
     const pillCls = TRAT_STATUS_COLORS[t.status] || '';
     const dt = t.created_at ? new Date(t.created_at).toLocaleString('pt-BR', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '—';
+    // Dados do Asaas para este cliente
+    const overdueVal = (_cache.all || [])
+      .filter(p => p.customer === t.customer_id && p.status === 'OVERDUE')
+      .reduce((s,p) => s+(p.value||0), 0);
+    const faturas = (_cache.all || []).filter(p => p.customer === t.customer_id).length;
+    const prioridade = faturas >= 6 ? '🔴 Alta' : faturas >= 3 ? '🟡 Média' : '🔵 Baixa';
+    const cpf = _cache.customers[t.customer_id]?.cpfCnpj || '—';
+
     const tr = document.createElement('tr');
-    tr.onclick = () => openClienteModal(t.customer_id);
     tr.innerHTML = `
-      <td>${t.customer_nome || '—'}</td>
+      <td style="cursor:pointer;" onclick="openClienteModal('${t.customer_id}')">${t.customer_nome || '—'}</td>
+      <td style="font-family:var(--font-mono);font-size:10px;">${cpf}</td>
       <td style="font-family:var(--font-mono);font-size:10px;">${t.customer_phone || '—'}</td>
-      <td style="font-family:var(--font-mono);font-size:11px;color:var(--accent);">${t.vendedora}</td>
-      <td><span class="status-pill ${pillCls}">${t.status}</span></td>
-      <td style="font-size:11px;color:var(--muted2);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${t.observacao || '—'}</td>
-      <td style="font-family:var(--font-mono);font-size:11px;color:var(--gold);text-align:right;">${t.valor_acordo ? toR(t.valor_acordo) : '—'}</td>
-      <td style="font-family:var(--font-mono);font-size:10px;color:var(--muted);">${dt}</td>`;
+      <td style="font-family:var(--font-mono);font-size:11px;color:var(--accent2);">${overdueVal > 0 ? toR(overdueVal) : '—'}</td>
+      <td style="font-family:var(--font-mono);font-size:10px;">${prioridade}</td>
+      <td style="font-family:var(--font-mono);font-size:10px;color:var(--muted);">${dt}</td>
+      <td>${t.status ? `<span class="status-pill ${pillCls}">${t.status}</span>` : '<span style="color:var(--muted);font-size:11px;">— Sem contato</span>'}</td>
+      <td style="font-family:var(--font-mono);font-size:11px;color:var(--accent);">${t.vendedora || '—'}</td>
+      <td style="font-size:11px;color:var(--muted2);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${t.observacao||''}">${t.observacao || '—'}</td>
+      <td style="text-align:center;">
+        <button onclick="abrirPopover(event,'${t.customer_id}','${(t.customer_nome||'').replace(/'/g,"\\'")}','${(t.customer_phone||'').replace(/'/g,"\\'")}',this)"
+          style="background:var(--accent);color:white;border:none;border-radius:6px;width:26px;height:26px;cursor:pointer;font-size:14px;display:inline-flex;align-items:center;justify-content:center;" title="Registrar contato">+</button>
+      </td>`;
     tbody.appendChild(tr);
   });
-  document.getElementById('trat-count').textContent = `${list.length} tratativa${list.length !== 1 ? 's' : ''}`;
+  document.getElementById('trat-count').textContent = `${rows.length} cliente${rows.length !== 1 ? 's' : ''}`;
 }
 
-function filterTratativas(filtro, btn) {
-  _tratFiltro = filtro;
-  document.querySelectorAll('#trat-filters .filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  let filtered = _tratativas;
-  if (filtro === 'pendentes') {
-    // Acordos feitos ou boleto enviado que ainda têm OVERDUE ativo
-    const customerIdsComOverdue = new Set(
-      (_cache.all || []).filter(p => p.status === 'OVERDUE').map(p => p.customer)
-    );
-    filtered = Object.values(_tratativasMap).filter(t =>
-      (t.status === 'Acordo feito' || t.status === 'Boleto enviado') &&
-      customerIdsComOverdue.has(t.customer_id)
-    );
-  } else if (filtro !== 'todos') {
-    filtered = _tratativas.filter(t => t.vendedora === filtro || t.status === filtro);
+// ── Filtro combinado ──
+function aplicarFiltrosTratativas() {
+  const busca   = (document.getElementById('trat-busca')?.value || '').toLowerCase().trim();
+  const vend    = document.getElementById('trat-fil-vendedora')?.value || '';
+  const status  = document.getElementById('trat-fil-status')?.value || '';
+  const periodo = document.getElementById('trat-fil-periodo')?.value || 'todos';
+
+  const now = new Date();
+  const inicioDia    = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const inicioSemana = new Date(inicioDia); inicioSemana.setDate(inicioDia.getDate() - inicioDia.getDay());
+  const inicioMes    = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  // Base: última tratativa por cliente + clientes sem tratativa
+  const clienteIds = new Set([
+    ..._tratativas.map(t => t.customer_id),
+    ...(_cache.clientes || []).map(c => c.customerId),
+  ]);
+
+  let rows = [...clienteIds].map(cid => {
+    const ultima = _tratativasMap[cid];
+    const cli = _cache.clientes.find(c => c.customerId === cid);
+    const info = _cache.customers[cid] || {};
+    return {
+      customer_id:    cid,
+      customer_nome:  info.name  || cli?.nome  || '—',
+      customer_phone: info.phone || cli?.phone || '—',
+      status:  ultima?.status || '',
+      vendedora: ultima?.vendedora || '',
+      observacao: ultima?.observacao || '',
+      valor_acordo: ultima?.valor_acordo || 0,
+      created_at: ultima?.created_at || '',
+    };
+  });
+
+  // Filtro busca
+  if (busca) {
+    rows = rows.filter(r => {
+      const cpf = (_cache.customers[r.customer_id]?.cpfCnpj || '').toLowerCase();
+      return r.customer_nome.toLowerCase().includes(busca) ||
+             r.customer_phone.toLowerCase().includes(busca) ||
+             cpf.includes(busca);
+    });
   }
-  renderTratativas(filtered);
+
+  // Filtro vendedora
+  if (vend) rows = rows.filter(r => r.vendedora === vend);
+
+  // Filtro status especial
+  if (status === 'pendentes') {
+    const comOverdue = new Set((_cache.all||[]).filter(p=>p.status==='OVERDUE').map(p=>p.customer));
+    rows = rows.filter(r => (r.status==='Acordo feito'||r.status==='Boleto enviado') && comOverdue.has(r.customer_id));
+  } else if (status === 'sem_tratativa') {
+    rows = rows.filter(r => !r.status);
+  } else if (status) {
+    rows = rows.filter(r => r.status === status);
+  }
+
+  // Filtro período (por data da última tratativa)
+  if (periodo !== 'todos') {
+    const inicio = periodo === 'hoje' ? inicioDia : periodo === 'semana' ? inicioSemana : inicioMes;
+    rows = rows.filter(r => r.created_at && new Date(r.created_at) >= inicio);
+  }
+
+  renderTratativas(rows);
+}
+
+// ── Popover ──
+let _popCustomerId = null;
+function abrirPopover(evt, customerId, nome, phone, btn) {
+  evt.stopPropagation();
+  _popCustomerId = customerId;
+  const pop = document.getElementById('trat-popover');
+  document.getElementById('pop-nome').textContent = nome;
+  document.getElementById('pop-vendedora').value = '';
+  document.getElementById('pop-status').value = '';
+  document.getElementById('pop-obs').value = '';
+  document.getElementById('pop-valor').value = '';
+  document.getElementById('pop-acordo-field').style.display = 'none';
+  document.getElementById('pop-error').style.display = 'none';
+  document.getElementById('pop-btn-salvar').disabled = false;
+  document.getElementById('pop-btn-salvar').textContent = 'Salvar';
+  pop.style.display = 'block';
+  // Posicionar próximo ao botão
+  const rect = btn.getBoundingClientRect();
+  const popW = 320, popH = 380;
+  let top = rect.bottom + 8;
+  let left = rect.left - popW + rect.width;
+  if (top + popH > window.innerHeight) top = rect.top - popH - 8;
+  if (left < 8) left = 8;
+  if (left + popW > window.innerWidth - 8) left = window.innerWidth - popW - 8;
+  pop.style.top = top + 'px';
+  pop.style.left = left + 'px';
+  // Salvar phone para uso no salvar
+  pop._customerPhone = phone;
+}
+
+function fecharPopover() {
+  document.getElementById('trat-popover').style.display = 'none';
+  _popCustomerId = null;
+}
+
+function togglePopAcordo() {
+  const s = document.getElementById('pop-status').value;
+  document.getElementById('pop-acordo-field').style.display =
+    (s === 'Acordo feito' || s === 'Boleto enviado') ? 'block' : 'none';
+}
+
+document.addEventListener('click', e => {
+  const pop = document.getElementById('trat-popover');
+  if (pop && pop.style.display !== 'none' && !pop.contains(e.target)) fecharPopover();
+});
+
+async function salvarPopover() {
+  const vendedora = document.getElementById('pop-vendedora').value;
+  const status    = document.getElementById('pop-status').value;
+  const obs       = document.getElementById('pop-obs').value.trim();
+  const valor     = document.getElementById('pop-valor').value;
+  const errEl     = document.getElementById('pop-error');
+
+  if (!vendedora || !status) {
+    errEl.textContent = 'Selecione vendedora e status.';
+    errEl.style.display = 'block'; return;
+  }
+
+  const btn = document.getElementById('pop-btn-salvar');
+  btn.disabled = true; btn.textContent = 'Salvando...';
+  errEl.style.display = 'none';
+
+  const info = _cache.customers[_popCustomerId] || {};
+  const cli  = _cache.clientes.find(c => c.customerId === _popCustomerId);
+
+  try {
+    const body = {
+      customer_id:    _popCustomerId,
+      customer_nome:  info.name  || cli?.nome  || '—',
+      customer_phone: info.phone || cli?.phone || '—',
+      customer_email: info.email || cli?.email || '—',
+      vendedora, status,
+      observacao: obs || null,
+      valor_acordo: valor ? parseFloat(valor) : null,
+    };
+    const r = await fetch(`${SB_URL}/rest/v1/tratativas`, {
+      method: 'POST', headers: SB_HEADERS, body: JSON.stringify(body)
+    });
+    if (!r.ok) throw new Error(`Supabase ${r.status}`);
+    fecharPopover();
+    await loadTratativas();
+    aplicarFiltrosTratativas();
+    btn.textContent = '✓ Salvo!';
+  } catch(err) {
+    errEl.textContent = 'Erro: ' + err.message;
+    errEl.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'Salvar';
+  }
 }
 
 function exportTratativasCSV() {
@@ -3260,6 +3544,173 @@ async function loadTratativasCliente(customerId) {
   } catch { wrap.innerHTML = '<div style="color:var(--muted);font-family:var(--font-mono);font-size:11px;">Erro ao carregar tratativas.</div>'; }
 }
 /* ── FIM BLOCO TRATATIVAS ── */
+
+/* ═══ BLOCO: PRODUTIVIDADE ═══ */
+let _prodPeriodo = 'mes';
+
+function setProdPeriodo(p, btn) {
+  _prodPeriodo = p;
+  document.querySelectorAll('[onclick^="setProdPeriodo"]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderProdutividade();
+}
+
+function getPeriodoInicio(periodo) {
+  const now = new Date();
+  if (periodo === 'hoje')   return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  if (periodo === 'semana') {
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    d.setDate(d.getDate() - d.getDay()); return d;
+  }
+  if (periodo === 'mes') return new Date(now.getFullYear(), now.getMonth(), 1);
+  return new Date(0); // todos
+}
+
+function renderProdutividade() {
+  if (!_tratativas.length) {
+    // Sem dados ainda — tentar carregar
+    if (_tratativas.length === 0) loadTratativas().then(renderProdutividade);
+    return;
+  }
+
+  const inicio = getPeriodoInicio(_prodPeriodo);
+  const lista = _tratativas.filter(t => !t.created_at || new Date(t.created_at) >= inicio);
+
+  // ── KPIs gerais ──
+  const contatos  = lista.length;
+  const acordos   = lista.filter(t => t.status === 'Acordo feito' || t.status === 'Boleto enviado');
+  const resolvidos = lista.filter(t => t.status === 'Resolvido');
+  const valorAcordos   = acordos.reduce((s,t) => s+(t.valor_acordo||0), 0);
+  const valorRecuperado = resolvidos.reduce((s,t) => s+(t.valor_acordo||0), 0);
+  const taxaConv = contatos > 0 ? Math.round(acordos.length / contatos * 100) : 0;
+
+  countUp(document.getElementById('pk1'), contatos, 'n');
+  document.getElementById('pk2').textContent = toR(valorAcordos);
+  document.getElementById('pk2').nextElementSibling.textContent = `${acordos.length} acordos`;
+  countUp(document.getElementById('pk3'), valorRecuperado, 'r');
+  document.getElementById('pk4').textContent = taxaConv + '%';
+
+  // ── Ranking por vendedora ──
+  const rankWrap = document.getElementById('prod-ranking');
+  rankWrap.innerHTML = '';
+  const porVend = {};
+  VENDEDORAS.forEach(v => { porVend[v] = { contatos:0, acordos:0, valor:0, resolvidos:0 }; });
+  lista.forEach(t => {
+    if (!porVend[t.vendedora]) return;
+    porVend[t.vendedora].contatos++;
+    if (t.status === 'Acordo feito' || t.status === 'Boleto enviado') {
+      porVend[t.vendedora].acordos++;
+      porVend[t.vendedora].valor += t.valor_acordo || 0;
+    }
+    if (t.status === 'Resolvido') porVend[t.vendedora].resolvidos++;
+  });
+
+  const sorted = VENDEDORAS.sort((a,b) => porVend[b].acordos - porVend[a].acordos);
+  const medals = ['🥇','🥈','🥉'];
+  const maxContatos = Math.max(...VENDEDORAS.map(v => porVend[v].contatos), 1);
+
+  sorted.forEach((v, i) => {
+    const d = porVend[v];
+    const pct = Math.round(d.contatos / maxContatos * 100);
+    const conv = d.contatos > 0 ? Math.round(d.acordos / d.contatos * 100) : 0;
+    const div = document.createElement('div');
+    div.style.cssText = 'background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;';
+    div.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:18px;">${medals[i]||'·'}</span>
+          <span style="font-family:var(--font-display);font-size:15px;font-weight:700;font-style:italic;">${v}</span>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-family:var(--font-display);font-size:16px;font-weight:700;color:var(--accent);">${toR(d.valor)}</div>
+          <div style="font-family:var(--font-mono);font-size:9px;color:var(--muted);">em acordos</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px;">
+        <div style="text-align:center;">
+          <div style="font-family:var(--font-mono);font-size:13px;color:var(--text);">${d.contatos}</div>
+          <div style="font-family:var(--font-mono);font-size:9px;color:var(--muted);">contatos</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-family:var(--font-mono);font-size:13px;color:var(--accent);">${d.acordos}</div>
+          <div style="font-family:var(--font-mono);font-size:9px;color:var(--muted);">acordos</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-family:var(--font-mono);font-size:13px;color:var(--gold);">${conv}%</div>
+          <div style="font-family:var(--font-mono);font-size:9px;color:var(--muted);">conversão</div>
+        </div>
+      </div>
+      <div style="height:5px;background:var(--surface3);border-radius:3px;overflow:hidden;">
+        <div style="height:100%;background:var(--accent);width:${pct}%;transition:width 1s cubic-bezier(.16,1,.3,1);border-radius:3px;"></div>
+      </div>`;
+    rankWrap.appendChild(div);
+  });
+
+  // ── Funil ──
+  const funilWrap = document.getElementById('prod-funil');
+  funilWrap.innerHTML = '';
+  const funil = [
+    { label: 'Tentativa de contato', color: '#6B8C78' },
+    { label: 'Aguardando retorno',   color: '#E0820A' },
+    { label: 'Acordo feito',         color: '#00A876' },
+    { label: 'Boleto enviado',       color: '#2BB5AC' },
+    { label: 'Resolvido',            color: '#00A876' },
+    { label: 'Sem sucesso',          color: '#D94F4F' },
+    { label: 'Negativar',            color: '#D94F4F' },
+  ];
+  const maxFunil = Math.max(...funil.map(f => lista.filter(t => t.status === f.label).length), 1);
+  funil.forEach(f => {
+    const n = lista.filter(t => t.status === f.label).length;
+    const pct = Math.round(n / maxFunil * 100);
+    const div = document.createElement('div');
+    div.style.cssText = 'display:grid;grid-template-columns:160px 1fr 40px;align-items:center;gap:8px;';
+    div.innerHTML = `
+      <div style="font-family:var(--font-mono);font-size:10px;color:var(--muted2);">${f.label}</div>
+      <div style="height:18px;background:var(--surface3);border-radius:3px;overflow:hidden;">
+        <div style="height:100%;background:${f.color};opacity:.8;width:${pct}%;transition:width 1s;border-radius:3px;"></div>
+      </div>
+      <div style="font-family:var(--font-mono);font-size:11px;color:var(--text);text-align:right;">${n}</div>`;
+    funilWrap.appendChild(div);
+  });
+
+  // ── Timeline 14 dias ──
+  const tlWrap = document.getElementById('prod-timeline');
+  tlWrap.innerHTML = '';
+  const now = new Date();
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+    const dStr = d.toISOString().slice(0,10);
+    const dia = d.toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit'});
+    const dodia = _tratativas.filter(t => t.created_at && t.created_at.slice(0,10) === dStr);
+    const maxDia = 10; // escala
+    const row = document.createElement('div');
+    row.style.cssText = 'display:grid;grid-template-columns:50px 1fr 1fr 1fr 40px;align-items:center;gap:6px;';
+    const cells = VENDEDORAS.map(v => {
+      const n = dodia.filter(t => t.vendedora === v).length;
+      const pct = Math.min(Math.round(n / maxDia * 100), 100);
+      const colors = { Sandra:'#00A876', Rayane:'#2BB5AC', Mirella:'#E0820A' };
+      return `<div style="position:relative;height:20px;background:var(--surface3);border-radius:3px;overflow:hidden;" title="${v}: ${n}">
+        <div style="height:100%;background:${colors[v]};opacity:.8;width:${pct}%;border-radius:3px;"></div>
+        ${n > 0 ? `<span style="position:absolute;left:4px;top:50%;transform:translateY(-50%);font-family:var(--font-mono);font-size:9px;color:white;">${n}</span>` : ''}
+      </div>`;
+    }).join('');
+    row.innerHTML = `
+      <div style="font-family:var(--font-mono);font-size:10px;color:var(--muted);">${dia}</div>
+      ${cells}
+      <div style="font-family:var(--font-mono);font-size:10px;color:var(--muted);text-align:right;">${dodia.length}</div>`;
+    tlWrap.appendChild(row);
+  }
+  // legenda
+  const leg = document.createElement('div');
+  leg.style.cssText = 'display:flex;gap:14px;margin-top:8px;';
+  VENDEDORAS.forEach(v => {
+    const colors = { Sandra:'#00A876', Rayane:'#2BB5AC', Mirella:'#E0820A' };
+    leg.innerHTML += `<div style="display:flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size:10px;color:var(--muted);">
+      <div style="width:10px;height:10px;border-radius:2px;background:${colors[v]};"></div>${v}</div>`;
+  });
+  tlWrap.appendChild(leg);
+}
+/* ── FIM BLOCO PRODUTIVIDADE ── */
 
 /* ═══ BLOCO: INIT ═══ */
 window.addEventListener('DOMContentLoaded', () => {
