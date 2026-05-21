@@ -927,7 +927,7 @@ body::before {
 <div class="app">
 
   <div class="hero">
-    <div class="hero-eyebrow">DIM+ Saúde &nbsp;·&nbsp; Painel Executivo &nbsp;·&nbsp; Ao vivo &nbsp;<span class="version-badge">v4.1 · 21/05/2026</span></div>
+    <div class="hero-eyebrow">DIM+ Saúde &nbsp;·&nbsp; Painel Executivo &nbsp;·&nbsp; Ao vivo &nbsp;<span class="version-badge">v4.3 · 21/05/2026</span></div>
     <h1>Dashboard<br><span>DIM+ Saúde</span></h1>
     <div class="hero-sub">Cobranças, inadimplência e receita — dados em tempo real via Asaas.</div>
     <div class="hero-actions">
@@ -1267,13 +1267,14 @@ body::before {
               <th>Telefone</th>
               <th>E-mail</th>
               <th>Status</th>
+              <th>Último contato</th>
               <th>Faturas</th>
               <th>1ª Fatura</th>
               <th>Pago total</th>
             </tr>
           </thead>
           <tbody id="clientes-tbody">
-            <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px;font-family:var(--font-mono);font-size:11px;">Carregando...</td></tr>
+            <tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px;font-family:var(--font-mono);font-size:11px;">Carregando...</td></tr>
           </tbody>
         </table>
       </div>
@@ -1336,6 +1337,7 @@ body::before {
               <th>E-mail</th>
               <th>Tipo</th>
               <th>Status</th>
+              <th>Último contato</th>
               <th>Valor</th>
               <th>Data solicitação</th>
             </tr>
@@ -1547,6 +1549,37 @@ body::before {
     <div class="panel full-grid">
       <div class="panel-title">Contatos por dia — últimos 14 dias</div>
       <div id="prod-timeline" style="display:flex;flex-direction:column;gap:6px;"></div>
+    </div>
+
+    <!-- Linha do tempo completa -->
+    <div class="panel full-grid" style="margin-top:16px;">
+      <div class="panel-title">
+        Linha do tempo · todos os registros
+        <div class="panel-actions">
+          <select id="hist-fil-vendedora" onchange="renderHistorico()" class="trat-select" style="width:auto;padding:6px 10px;font-size:11px;">
+            <option value="">Todas vendedoras</option>
+            <option value="Sandra">Sandra</option>
+            <option value="Rayane">Rayane</option>
+            <option value="Mirella">Mirella</option>
+          </select>
+          <select id="hist-fil-status" onchange="renderHistorico()" class="trat-select" style="width:auto;padding:6px 10px;font-size:11px;">
+            <option value="">Todos status</option>
+            <option value="Tentativa de contato">Tentativa de contato</option>
+            <option value="Aguardando retorno">Aguardando retorno</option>
+            <option value="Acordo feito">Acordo feito</option>
+            <option value="Boleto enviado">Boleto enviado</option>
+            <option value="Sem sucesso">Sem sucesso</option>
+            <option value="Negativar">Negativar</option>
+            <option value="Resolvido">Resolvido</option>
+          </select>
+          <button class="btn-export" onclick="exportHistoricoCSV()">↓ CSV</button>
+        </div>
+      </div>
+      <div id="hist-lista" style="display:flex;flex-direction:column;gap:6px;max-height:500px;overflow-y:auto;"></div>
+      <div id="hist-mais-btn" style="margin-top:10px;text-align:center;display:none;">
+        <button class="filter-btn" onclick="renderHistoricoMais()" style="padding:8px 20px;">Carregar mais</button>
+      </div>
+      <div id="hist-count" style="margin-top:8px;font-family:var(--font-mono);font-size:10px;color:var(--muted);"></div>
     </div>
 
   </div><!-- /tab-produtividade -->
@@ -2367,6 +2400,7 @@ function renderClientesTabela(clientes, filtro) {
       <td style="font-family:var(--font-mono);font-size:10px;">${c.phone}</td>
       <td style="font-family:var(--font-mono);font-size:10px;color:var(--muted);">${c.email}</td>
       <td><span class="status-pill ${pillCls}">${pillLabel}</span></td>
+      <td>${getTratativaData(c.customerId)}</td>
       <td style="font-family:var(--font-mono);font-size:11px;color:var(--muted2);">${c.faturas}</td>
       <td style="font-family:var(--font-mono);font-size:10px;color:var(--muted);">${c.primeira || '—'}</td>
       <td>${toR(c.pago)}</td>`;
@@ -3057,7 +3091,7 @@ function _renderNegTabela(list) {
   tbody.innerHTML = '';
 
   if (!list.length) {
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px;font-family:var(--font-mono);font-size:11px;">Nenhum registro neste filtro.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:20px;font-family:var(--font-mono);font-size:11px;">Nenhum registro neste filtro.</td></tr>`;
     document.getElementById('neg-count').textContent = '';
     return;
   }
@@ -3079,12 +3113,15 @@ function _renderNegTabela(list) {
       tr.onclick = () => openClienteModal(d._customerId);
     }
     tr.innerHTML = `
-      <td>${nome}</td>
+      <td>${nome} ${d._customerId ? getTratativaBadge(d._customerId) : ''}</td>
       <td style="font-family:var(--font-mono);font-size:10px;">${cpf}</td>
       <td style="font-family:var(--font-mono);font-size:10px;color:var(--muted);">${phone}</td>
       <td style="font-family:var(--font-mono);font-size:10px;color:var(--muted);">${email}</td>
       <td style="font-family:var(--font-mono);font-size:10px;color:var(--muted2);">${tipo}</td>
       <td><span class="status-pill ${pillCls}">${pillLabel}</span></td>
+      <td>${d._customerId ? getTratativaData(d._customerId) : '—'}</td>
+      <td style="font-family:var(--font-mono);font-size:11px;color:var(--gold);text-align:right;">${toR(valor)}</td>
+      <td style="font-family:var(--font-mono);font-size:10px;color:var(--muted);">${data}</td>`;
       <td style="font-family:var(--font-mono);font-size:11px;color:var(--gold);text-align:right;">${toR(valor)}</td>
       <td style="font-family:var(--font-mono);font-size:10px;color:var(--muted);">${data}</td>`;
     tbody.appendChild(tr);
@@ -3147,6 +3184,20 @@ function getTratativaBadge(customerId) {
   };
   const color = colors[t.status] || 'var(--muted)';
   return `<span style="font-family:var(--font-mono);font-size:9px;padding:1px 6px;border-radius:10px;background:${color}22;color:${color};border:1px solid ${color}44;white-space:nowrap;">● ${t.status}</span>`;
+}
+
+function getTratativaData(customerId) {
+  const t = _tratativasMap[customerId];
+  if (!t || !t.created_at) {
+    return `<span style="font-family:var(--font-mono);font-size:10px;color:var(--muted);">Nunca</span>`;
+  }
+  const dias = Math.floor((Date.now() - new Date(t.created_at)) / 86400000);
+  const dt = new Date(t.created_at).toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit'});
+  let cor = '#00A876'; // verde — menos de 3 dias
+  if (dias > 7)      cor = '#D94F4F'; // vermelho
+  else if (dias > 3) cor = '#E0820A'; // âmbar
+  const label = dias === 0 ? 'hoje' : dias === 1 ? 'ontem' : `${dias}d atrás`;
+  return `<span style="font-family:var(--font-mono);font-size:10px;color:${cor};white-space:nowrap;" title="${t.vendedora} · ${t.status}">${dt} · ${label}</span>`;
 }
 
 async function loadTratativas() {
@@ -3257,7 +3308,7 @@ function renderTratativas(list) {
       <td style="font-family:var(--font-mono);font-size:11px;color:var(--accent);">${t.vendedora || '—'}</td>
       <td style="font-size:11px;color:var(--muted2);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${t.observacao||''}">${t.observacao || '—'}</td>
       <td style="text-align:center;">
-        <button onclick="abrirPopover(event,'${t.customer_id}','${(t.customer_nome||'').replace(/'/g,"\\'")}','${(t.customer_phone||'').replace(/'/g,"\\'")}',this)"
+        <button onclick="abrirPopover(event,'${t.customer_id}','${encodeURIComponent(t.customer_nome||'')}','${encodeURIComponent(t.customer_phone||'')}',this)"
           style="background:var(--accent);color:white;border:none;border-radius:6px;width:26px;height:26px;cursor:pointer;font-size:14px;display:inline-flex;align-items:center;justify-content:center;" title="Registrar contato">+</button>
       </td>`;
     tbody.appendChild(tr);
@@ -3335,9 +3386,11 @@ function aplicarFiltrosTratativas() {
 let _popCustomerId = null;
 function abrirPopover(evt, customerId, nome, phone, btn) {
   evt.stopPropagation();
+  evt.preventDefault();
+  _popoverJustOpened = true;
   _popCustomerId = customerId;
   const pop = document.getElementById('trat-popover');
-  document.getElementById('pop-nome').textContent = nome;
+  document.getElementById('pop-nome').textContent = decodeURIComponent(nome);
   document.getElementById('pop-vendedora').value = '';
   document.getElementById('pop-status').value = '';
   document.getElementById('pop-obs').value = '';
@@ -3349,15 +3402,14 @@ function abrirPopover(evt, customerId, nome, phone, btn) {
   pop.style.display = 'block';
   // Posicionar próximo ao botão
   const rect = btn.getBoundingClientRect();
-  const popW = 320, popH = 380;
-  let top = rect.bottom + 8;
+  const popW = 320, popH = 400;
+  let top  = rect.bottom + 8;
   let left = rect.left - popW + rect.width;
-  if (top + popH > window.innerHeight) top = rect.top - popH - 8;
+  if (top + popH > window.innerHeight - 8) top = rect.top - popH - 8;
   if (left < 8) left = 8;
   if (left + popW > window.innerWidth - 8) left = window.innerWidth - popW - 8;
-  pop.style.top = top + 'px';
+  pop.style.top  = top  + window.scrollY + 'px';
   pop.style.left = left + 'px';
-  // Salvar phone para uso no salvar
   pop._customerPhone = phone;
 }
 
@@ -3372,7 +3424,9 @@ function togglePopAcordo() {
     (s === 'Acordo feito' || s === 'Boleto enviado') ? 'block' : 'none';
 }
 
+let _popoverJustOpened = false;
 document.addEventListener('click', e => {
+  if (_popoverJustOpened) { _popoverJustOpened = false; return; }
   const pop = document.getElementById('trat-popover');
   if (pop && pop.style.display !== 'none' && !pop.contains(e.target)) fecharPopover();
 });
@@ -3614,7 +3668,16 @@ function renderProdutividade() {
     const pct = Math.round(d.contatos / maxContatos * 100);
     const conv = d.contatos > 0 ? Math.round(d.acordos / d.contatos * 100) : 0;
     const div = document.createElement('div');
-    div.style.cssText = 'background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;';
+    div.style.cssText = 'background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;cursor:pointer;transition:border-color .2s;';
+    div.setAttribute('data-vendedora', v);
+    div.onclick = function() {
+      // Filtrar historico por esta vendedora
+      const hfv = document.getElementById('hist-fil-vendedora');
+      if (hfv) { hfv.value = v; renderHistorico(); }
+      // Scroll para linha do tempo
+      document.getElementById('hist-lista')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    div.title = `Clique para ver histórico de ${v}`;
     div.innerHTML = `
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
         <div style="display:flex;align-items:center;gap:8px;">
@@ -3709,8 +3772,91 @@ function renderProdutividade() {
       <div style="width:10px;height:10px;border-radius:2px;background:${colors[v]};"></div>${v}</div>`;
   });
   tlWrap.appendChild(leg);
+
+  // Renderizar linha do tempo
+  renderHistorico();
 }
 /* ── FIM BLOCO PRODUTIVIDADE ── */
+
+/* ═══ BLOCO: HISTÓRICO / AUDITORIA ═══ */
+let _histOffset = 0;
+const HIST_PAGE = 50;
+
+function renderHistorico() {
+  _histOffset = 0;
+  _renderHistoricoPage(true);
+}
+
+function renderHistoricoMais() {
+  _histOffset += HIST_PAGE;
+  _renderHistoricoPage(false);
+}
+
+function _getHistoricoFiltrado() {
+  const vend   = document.getElementById('hist-fil-vendedora')?.value || '';
+  const status = document.getElementById('hist-fil-status')?.value || '';
+  let list = [..._tratativas].sort((a,b) => (b.created_at||'').localeCompare(a.created_at||''));
+  if (vend)   list = list.filter(t => t.vendedora === vend);
+  if (status) list = list.filter(t => t.status === status);
+  return list;
+}
+
+function _renderHistoricoPage(reset) {
+  const lista = document.getElementById('hist-lista');
+  if (reset) lista.innerHTML = '';
+  const all = _getHistoricoFiltrado();
+  const page = all.slice(_histOffset, _histOffset + HIST_PAGE);
+
+  if (!all.length) {
+    lista.innerHTML = '<div style="color:var(--muted);font-family:var(--font-mono);font-size:11px;padding:12px 0;">Nenhum registro encontrado.</div>';
+    document.getElementById('hist-count').textContent = '';
+    document.getElementById('hist-mais-btn').style.display = 'none';
+    return;
+  }
+
+  const COLORS = { Sandra:'#00A876', Rayane:'#2BB5AC', Mirella:'#E0820A' };
+  const pillColors = {
+    'Tentativa de contato': '#6B8C78', 'Aguardando retorno': '#E0820A',
+    'Acordo feito': '#00A876', 'Boleto enviado': '#2BB5AC',
+    'Sem sucesso': '#D94F4F', 'Negativar': '#D94F4F', 'Resolvido': '#00A876',
+  };
+
+  page.forEach(t => {
+    const dt = t.created_at
+      ? new Date(t.created_at).toLocaleString('pt-BR', {day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'})
+      : '—';
+    const vColor = COLORS[t.vendedora] || 'var(--muted)';
+    const sColor = pillColors[t.status] || 'var(--muted)';
+    const div = document.createElement('div');
+    div.style.cssText = 'display:grid;grid-template-columns:130px 100px 140px 1fr auto;align-items:center;gap:10px;padding:8px 12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);';
+    div.innerHTML = `
+      <div style="font-family:var(--font-mono);font-size:10px;color:var(--muted);">${dt}</div>
+      <div style="font-family:var(--font-mono);font-size:11px;font-weight:500;color:${vColor};">${t.vendedora}</div>
+      <div style="font-size:11px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${t.customer_nome||''}">${t.customer_nome || '—'}</div>
+      <div style="font-size:11px;color:var(--muted2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${t.observacao||''}">${t.observacao || '—'}</div>
+      <div>
+        <span style="font-family:var(--font-mono);font-size:9px;padding:2px 7px;border-radius:10px;background:${sColor}22;color:${sColor};border:1px solid ${sColor}44;white-space:nowrap;">${t.status}</span>
+        ${t.valor_acordo ? `<span style="font-family:var(--font-mono);font-size:9px;color:var(--gold);margin-left:4px;">${toR(t.valor_acordo)}</span>` : ''}
+      </div>`;
+    lista.appendChild(div);
+  });
+
+  const fim = _histOffset + HIST_PAGE;
+  document.getElementById('hist-mais-btn').style.display = fim < all.length ? 'block' : 'none';
+  document.getElementById('hist-count').textContent = `Exibindo ${Math.min(fim, all.length)} de ${all.length} registros`;
+}
+
+function exportHistoricoCSV() {
+  const all = _getHistoricoFiltrado();
+  const rows = [['Data','Vendedora','Cliente','Telefone','Status','Observação','Valor Acordo']];
+  all.forEach(t => {
+    const dt = t.created_at ? new Date(t.created_at).toLocaleString('pt-BR') : '—';
+    rows.push([dt, t.vendedora, t.customer_nome||'—', t.customer_phone||'—',
+      t.status, t.observacao||'—', t.valor_acordo ? toRFull(t.valor_acordo) : '—']);
+  });
+  downloadCSV('dimplus_historico_tratativas.csv', rows);
+}
+/* ── FIM BLOCO HISTÓRICO ── */
 
 /* ═══ BLOCO: INIT ═══ */
 window.addEventListener('DOMContentLoaded', () => {
