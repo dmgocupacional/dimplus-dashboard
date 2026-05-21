@@ -640,31 +640,63 @@ body::before {
 /* ── FIM BLOCO MODAL ── */
 
 /* ═══ BLOCO: CALCULADORA NEGOCIAÇÃO ═══ */
+.neg-toggle-btn {
+  width: 100%; padding: 10px 14px;
+  background: var(--surface3); border: 1px solid var(--border2);
+  border-radius: var(--r); cursor: pointer;
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: .08em; text-transform: uppercase;
+  color: var(--muted2); display: flex; align-items: center; gap: 8px;
+  transition: all .2s; margin-top: 16px;
+}
+.neg-toggle-btn:hover { border-color: var(--accent); color: var(--accent); }
+.neg-toggle-btn.open { color: var(--accent); border-color: var(--accent); background: rgba(0,168,118,.06); }
+.neg-toggle-arrow { margin-left: auto; transition: transform .2s; }
+.neg-toggle-btn.open .neg-toggle-arrow { transform: rotate(180deg); }
+
 .negociacao-box {
-  margin-top: 20px;
+  margin-top: 10px;
   background: var(--surface3);
   border: 1px solid var(--border2);
   border-radius: var(--r);
   padding: 16px;
+  display: none;
 }
+.negociacao-box.open { display: block; }
 .negociacao-title {
   font-family: var(--font-mono); font-size: 10px;
   letter-spacing: .12em; text-transform: uppercase;
-  color: var(--muted2); margin-bottom: 12px;
-  display: flex; align-items: center; gap: 6px;
+  color: var(--muted2); margin-bottom: 14px;
 }
 .negociacao-valores {
   display: grid; grid-template-columns: repeat(3,1fr);
-  gap: 8px; margin-bottom: 14px;
+  gap: 8px; margin-bottom: 16px;
 }
-.neg-val-item { display: flex; flex-direction: column; gap: 2px; }
+.neg-val-item { display: flex; flex-direction: column; gap: 3px;
+  background: white; border-radius: 8px; padding: 10px 12px;
+  border: 1px solid var(--border);
+}
 .neg-val-label { font-family: var(--font-mono); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
-.neg-val-num { font-family: var(--font-display); font-size: 16px; font-weight: 700; font-style: italic; }
+.neg-val-num { font-family: var(--font-display); font-size: 17px; font-weight: 700; font-style: italic; }
 .neg-val-num.original { color: var(--muted2); }
 .neg-val-num.juros     { color: var(--red); }
 .neg-val-num.total-j   { color: var(--accent2); }
+
+/* Presets rápidos */
+.neg-presets {
+  display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap;
+}
+.neg-preset-btn {
+  padding: 5px 12px; border-radius: 20px;
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: .06em;
+  cursor: pointer; border: 1px solid var(--border2);
+  background: transparent; color: var(--muted2); transition: all .2s;
+}
+.neg-preset-btn:hover { border-color: var(--accent); color: var(--accent); }
+.neg-preset-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+
 .negociacao-slider-row {
-  display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+  display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
 }
 .neg-slider-label { font-family: var(--font-mono); font-size: 10px; color: var(--muted); flex-shrink: 0; }
 .neg-slider { flex: 1; height: 4px; accent-color: var(--accent); cursor: pointer; }
@@ -673,21 +705,22 @@ body::before {
   color: var(--accent); background: rgba(0,168,118,.12);
   border-radius: 6px; padding: 2px 8px; min-width: 44px; text-align: center; flex-shrink: 0;
 }
+
 .negociacao-proposta {
-  background: white; border: 1px solid var(--border2);
-  border-radius: 8px; padding: 12px 14px;
+  background: white; border: 2px solid var(--accent);
+  border-radius: 10px; padding: 14px 16px;
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
 }
 .neg-proposta-left { display: flex; flex-direction: column; gap: 2px; }
 .neg-proposta-label { font-family: var(--font-mono); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
-.neg-proposta-val { font-family: var(--font-display); font-size: 22px; font-weight: 700; font-style: italic; color: var(--accent); }
+.neg-proposta-val { font-family: var(--font-display); font-size: 24px; font-weight: 700; font-style: italic; color: var(--accent); }
 .neg-proposta-economia { font-family: var(--font-mono); font-size: 10px; color: var(--red); }
 .btn-copiar-whats {
   display: flex; align-items: center; gap: 6px;
-  padding: 8px 14px; border-radius: 8px;
+  padding: 10px 16px; border-radius: 8px;
   background: #25D366; color: white; border: none; cursor: pointer;
   font-family: var(--font-mono); font-size: 11px; letter-spacing: .04em;
-  transition: all .2s; flex-shrink: 0;
+  transition: all .2s; flex-shrink: 0; white-space: nowrap;
 }
 .btn-copiar-whats:hover { opacity: .88; }
 .btn-copiar-whats.copiado { background: var(--accent); }
@@ -776,7 +809,7 @@ body::before {
 <div class="app">
 
   <div class="hero">
-    <div class="hero-eyebrow">DIM+ Saúde &nbsp;·&nbsp; Painel Executivo &nbsp;·&nbsp; Ao vivo &nbsp;<span class="version-badge">v3.2 · 20/05/2026</span></div>
+    <div class="hero-eyebrow">DIM+ Saúde &nbsp;·&nbsp; Painel Executivo &nbsp;·&nbsp; Ao vivo &nbsp;<span class="version-badge">v3.3 · 21/05/2026</span></div>
     <h1>Dashboard<br><span>DIM+ Saúde</span></h1>
     <div class="hero-sub">Cobranças, inadimplência e receita — dados em tempo real via Asaas.</div>
     <div class="hero-actions">
@@ -1177,6 +1210,7 @@ body::before {
             <tr>
               <th>Nome</th>
               <th>CPF/CNPJ</th>
+              <th>Telefone</th>
               <th>Tipo</th>
               <th>Status</th>
               <th>Valor</th>
@@ -1263,8 +1297,12 @@ body::before {
         <tbody id="modal-faturas-tbody"></tbody>
       </table>
       <!-- Calculadora de negociação -->
-      <div class="negociacao-box" id="neg-box" style="display:none;">
-        <div class="negociacao-title">Calculadora de negociação</div>
+      <button class="neg-toggle-btn" id="neg-toggle-btn" onclick="toggleNegociacao()" style="display:none;">
+        ⚖ Calculadora de negociação
+        <span class="neg-toggle-arrow">▾</span>
+      </button>
+      <div class="negociacao-box" id="neg-box">
+        <div class="negociacao-title">Simulação de proposta</div>
         <div class="negociacao-valores">
           <div class="neg-val-item">
             <span class="neg-val-label">Sem juros</span>
@@ -1279,9 +1317,17 @@ body::before {
             <span class="neg-val-num total-j" id="neg-total">—</span>
           </div>
         </div>
+        <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Desconto nos juros</div>
+        <div class="neg-presets" id="neg-presets">
+          <button class="neg-preset-btn active" onclick="setPreset(100,this)">100% — sem juros</button>
+          <button class="neg-preset-btn" onclick="setPreset(75,this)">75%</button>
+          <button class="neg-preset-btn" onclick="setPreset(50,this)">50%</button>
+          <button class="neg-preset-btn" onclick="setPreset(25,this)">25%</button>
+          <button class="neg-preset-btn" onclick="setPreset(0,this)">0% — valor cheio</button>
+        </div>
         <div class="negociacao-slider-row">
-          <span class="neg-slider-label">Desconto nos juros:</span>
-          <input type="range" class="neg-slider" id="neg-slider" min="0" max="100" value="100" oninput="updateNegociacao()">
+          <span class="neg-slider-label">Personalizar:</span>
+          <input type="range" class="neg-slider" id="neg-slider" min="0" max="100" value="100" oninput="updateNegociacao(true)">
           <span class="neg-pct-badge" id="neg-pct">100%</span>
         </div>
         <div class="negociacao-proposta">
@@ -2017,33 +2063,43 @@ async function loadData() {
   document.getElementById('ref-icon').textContent = '↻';
 
   try {
-    // 1. Buscar todas as faturas em paralelo
+    // 1. Buscar OVERDUE, RECEIVED, CONFIRMED em paralelo (sem CANCELLED — lazy)
     setStatus('loading', 'Buscando faturas...');
-    const [overdue, received, confirmed, cancelled] = await Promise.all([
+    const [overdue, received, confirmed] = await Promise.all([
       fetchAll('/payments', { status: 'OVERDUE' }),
       fetchAll('/payments', { status: 'RECEIVED' }),
       fetchAll('/payments', { status: 'CONFIRMED' }),
-      fetchAll('/payments', { status: 'CANCELLED' }),
     ]);
-    const all = [...overdue, ...received, ...confirmed, ...cancelled];
-    _cache.all = all;
-    _cache.customers = {}; // reset cache de nomes ao recarregar
+    const allSemCancelled = [...overdue, ...received, ...confirmed];
 
-    // Calcular todos os IDs únicos válidos
+    // Render parcial: mostrar inadimplência imediatamente
+    setStatus('loading', 'Processando inadimplência...');
+    const { neverPaid: neverPaidParcial, totalNunca: totalNuncaParcial, totalCancelled: totalCancelledParcial } = processInadimplencia(allSemCancelled);
+    _cache.neverPaid = neverPaidParcial;
+    const totalOverdueGeral    = overdue.reduce((s,p) => s+(p.value||0), 0);
+    const totalOverdueComJuros = overdue.reduce((s,p) => s+(p.value||0)+calcAcrescimos(p), 0);
+    const recParcial = processReceita(allSemCancelled);
+    renderKPIsInad(allSemCancelled.length + '…', totalOverdueGeral, totalOverdueComJuros, neverPaidParcial.length, totalNuncaParcial, totalCancelledParcial, recParcial.recMesAtual);
+    const byMonthParcial = renderBars(neverPaidParcial);
+    renderDonut(neverPaidParcial);
+    renderPriorities(neverPaidParcial);
+    renderAlert(neverPaidParcial, byMonthParcial);
+    setStatus('loading', 'Buscando cancelados...');
+
+    // 2. Buscar CANCELLED em background
+    const cancelled = await fetchAll('/payments', { status: 'CANCELLED' });
+    const all = [...allSemCancelled, ...cancelled];
+    _cache.all = all;
+    _cache.customers = {};
     _cache.allCustomerIds = [...new Set(all.map(p => p.customer).filter(Boolean))];
 
-    // Atualizar aviso "Todos" no seletor
     const todosBtn = document.getElementById('enrich-todos-btn');
-    if (todosBtn) {
-      todosBtn.textContent = `Todos (${_cache.allCustomerIds.length})`;
-    }
+    if (todosBtn) todosBtn.textContent = `Todos (${_cache.allCustomerIds.length})`;
 
-    // 2. Processar inadimplência
-    setStatus('loading', 'Processando inadimplência...');
+    // 3. Processar completo
+    setStatus('loading', 'Processando dados completos...');
     const { neverPaid, totalNunca, totalCancelled } = processInadimplencia(all);
     _cache.neverPaid = neverPaid;
-
-    // 3. Processar receita
     const rec = processReceita(all);
     _cache.receitaMensal = rec.receitaMensal;
 
@@ -2051,10 +2107,10 @@ async function loadData() {
     setStatus('loading', 'Buscando nomes dos clientes...');
     await runEnrichAndRenderClientes();
 
-    // 5. Renderizar aba inadimplência
-    const totalOverdueGeral = overdue.reduce((s,p) => s+(p.value||0), 0);
-    const totalOverdueComJuros = overdue.reduce((s,p) => s+(p.value||0)+calcAcrescimos(p), 0);
-    renderKPIsInad(all.length, totalOverdueGeral, totalOverdueComJuros, neverPaid.length, totalNunca, totalCancelled, rec.recMesAtual);
+    // 5. Renderizar aba inadimplência completa
+    const totalOverdueFinal    = overdue.reduce((s,p) => s+(p.value||0), 0);
+    const totalOverdueComJurosFinal = overdue.reduce((s,p) => s+(p.value||0)+calcAcrescimos(p), 0);
+    renderKPIsInad(all.length, totalOverdueFinal, totalOverdueComJurosFinal, neverPaid.length, totalNunca, totalCancelled, rec.recMesAtual);
     const byMonth = renderBars(neverPaid);
     renderDonut(neverPaid);
     renderPriorities(neverPaid);
@@ -2141,16 +2197,19 @@ function openClienteModal(customerId) {
 
   // Calculadora de negociação
   const negBox = document.getElementById('neg-box');
-  if (totalAcrescimos > 0) {
+  if (totalAcrescimos > 0.01) {
     negBox.style.display = 'block';
     document.getElementById('neg-original').textContent = toRFull(totalAberto);
     document.getElementById('neg-juros').textContent    = toRFull(totalAcrescimos);
     document.getElementById('neg-total').textContent    = toRFull(totalAberto + totalAcrescimos);
     document.getElementById('neg-slider').value = 100;
+    // Reset presets
+    document.querySelectorAll('.neg-preset-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector('.neg-preset-btn').classList.add('active');
     window._negOriginal    = totalAberto;
     window._negAcrescimos  = totalAcrescimos;
     window._negNome        = info.name || cli?.nome || '—';
-    updateNegociacao();
+    updateNegociacao(false);
   } else {
     negBox.style.display = 'none';
   }
@@ -2369,22 +2428,33 @@ function renderDevedoresFiltrados() {
 /* ── FIM BLOCO FILTROS DEVEDORES ── */
 
 /* ═══ BLOCO: CALCULADORA NEGOCIAÇÃO ═══ */
-function updateNegociacao() {
+function setPreset(pct, btn) {
+  document.getElementById('neg-slider').value = pct;
+  document.querySelectorAll('.neg-preset-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  updateNegociacao(false);
+}
+
+function updateNegociacao(fromSlider) {
   const pct = parseInt(document.getElementById('neg-slider').value);
   const original   = window._negOriginal || 0;
   const acrescimos = window._negAcrescimos || 0;
   const descontoVal = acrescimos * (pct / 100);
   const proposta = original + acrescimos - descontoVal;
-  const economia = acrescimos - (acrescimos - descontoVal);
+  const economia = descontoVal;
 
   document.getElementById('neg-pct').textContent = pct + '%';
   document.getElementById('neg-proposta').textContent = toRFull(proposta);
   document.getElementById('neg-economia').textContent =
-    pct > 0 ? `economia de ${toRFull(economia)} em juros/multa` : 'sem desconto nos juros';
+    pct > 0 ? `economia de ${toRFull(economia)} em juros/multa` : 'sem desconto — valor cheio';
+
+  // Se slider foi movido manualmente, desativar presets
+  if (fromSlider) {
+    document.querySelectorAll('.neg-preset-btn').forEach(b => b.classList.remove('active'));
+  }
 
   const btn = document.getElementById('btn-copiar-whats');
-  btn.classList.remove('copiado');
-  btn.textContent = '💬 Copiar WhatsApp';
+  if (btn) { btn.classList.remove('copiado'); btn.textContent = '💬 Copiar WhatsApp'; }
 }
 
 function copiarWhatsApp() {
@@ -2447,6 +2517,21 @@ async function loadNegativados() {
 
   try {
     const dunnings = await fetchAll('/paymentDunnings', {});
+
+    // Enrich: buscar customer info dos IDs únicos
+    const customerIds = [...new Set(dunnings.map(d => d.customer).filter(Boolean))];
+    const missing = customerIds.filter(id => !_cache.customers[id]);
+    if (missing.length > 0) {
+      const enriched = await enrichCustomers(missing.slice(0, 80));
+      Object.assign(_cache.customers, enriched);
+    }
+
+    // Aplicar nomes e CPFs
+    dunnings.forEach(d => {
+      const c = _cache.customers[d.customer];
+      if (c) { d._nome = c.name; d._cpf = c.cpfCnpj; d._phone = c.phone; }
+    });
+
     _cache.negativados = dunnings;
     renderNegativados(dunnings);
     renderKPIsNeg(dunnings);
@@ -2456,9 +2541,9 @@ async function loadNegativados() {
 }
 
 function renderKPIsNeg(dunnings) {
-  const total     = dunnings.length;
+  const total      = dunnings.length;
   const valorTotal = dunnings.reduce((s,d) => s+(d.value||d.amount||0), 0);
-  const ativos    = dunnings.filter(d => d.status === 'RECEIVED' || d.status === 'REQUESTED').length;
+  const ativos     = dunnings.filter(d => ['RECEIVED','REQUESTED','PROCESSED'].includes(d.status)).length;
   const cancelados = dunnings.filter(d => d.status === 'CANCELLED').length;
   countUp(document.getElementById('n1'), total, 'n');
   countUp(document.getElementById('n2'), valorTotal, 'r');
@@ -2468,6 +2553,7 @@ function renderKPIsNeg(dunnings) {
 
 const negStatusLabel = {
   REQUESTED:            ['pill-overdue',  'Solicitado'],
+  PROCESSED:            ['pill-ativo',    'Ativo · Serasa'],
   RECEIVED:             ['pill-ativo',    'Ativo'],
   CANCELLED:            ['pill-churn',    'Cancelado'],
   AWAITING_CANCELLATION:['pill-fantasma', 'Aguard. cancelamento'],
@@ -2501,23 +2587,25 @@ function _renderNegTabela(list) {
   tbody.innerHTML = '';
 
   if (!list.length) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px;font-family:var(--font-mono);font-size:11px;">Nenhum registro neste filtro.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px;font-family:var(--font-mono);font-size:11px;">Nenhum registro neste filtro.</td></tr>`;
     document.getElementById('neg-count').textContent = '';
     return;
   }
 
   list.forEach(d => {
     const [pillCls, pillLabel] = negStatusLabel[d.status] || ['', d.status];
-    const tipo = negTypeLabel[d.type] || d.type || '—';
+    const tipo  = negTypeLabel[d.type] || d.type || '—';
     const valor = d.value || d.amount || 0;
-    const data = d.requestDate || d.dateCreated || d.createdAt || '—';
-    const nome = d.customerName || d.customer || '—';
-    const cpf  = d.customerCpfCnpj || '—';
+    const data  = d.requestDate || d.dateCreated || d.createdAt || '—';
+    const nome  = d._nome || d.customerName || '—';
+    const cpf   = d._cpf  || d.customerCpfCnpj || '—';
+    const phone = d._phone || '—';
 
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${nome}</td>
       <td style="font-family:var(--font-mono);font-size:10px;">${cpf}</td>
+      <td style="font-family:var(--font-mono);font-size:10px;color:var(--muted);">${phone}</td>
       <td style="font-family:var(--font-mono);font-size:10px;color:var(--muted2);">${tipo}</td>
       <td><span class="status-pill ${pillCls}">${pillLabel}</span></td>
       <td style="font-family:var(--font-mono);font-size:11px;color:var(--gold);text-align:right;">${toR(valor)}</td>
