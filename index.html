@@ -927,7 +927,7 @@ body::before {
 <div class="app">
 
   <div class="hero">
-    <div class="hero-eyebrow">DIM+ Saúde &nbsp;·&nbsp; Painel Executivo &nbsp;·&nbsp; Ao vivo &nbsp;<span class="version-badge">v4.3 · 21/05/2026</span></div>
+    <div class="hero-eyebrow">DIM+ Saúde &nbsp;·&nbsp; Painel Executivo &nbsp;·&nbsp; Ao vivo &nbsp;<span class="version-badge">v4.4 · 21/05/2026</span></div>
     <h1>Dashboard<br><span>DIM+ Saúde</span></h1>
     <div class="hero-sub">Cobranças, inadimplência e receita — dados em tempo real via Asaas.</div>
     <div class="hero-actions">
@@ -1778,9 +1778,7 @@ body::before {
 /* ═══ BLOCO: ESTADO GLOBAL ═══ */
 const LS = 'dimplus_worker_url';
 const WORKER_DEFAULT = 'https://dimplus-asaas.henrrique-paludo.workers.dev';
-let WORKER = localStorage.getItem(LS) || WORKER_DEFAULT;
-// Garantir que o Worker padrão esteja sempre salvo
-if (!localStorage.getItem(LS)) localStorage.setItem(LS, WORKER_DEFAULT);
+let WORKER = WORKER_DEFAULT; // sempre fixo — ignorar localStorage para o worker
 
 // Supabase DIM+ Saúde
 const SB_URL  = 'https://bhrxfudnhxqntnnbgyjg.supabase.co';
