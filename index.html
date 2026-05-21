@@ -772,18 +772,136 @@ body::before {
 @media (max-width: 1000px) {
   .main-grid { grid-template-columns: 1fr; }
   .two-grid { grid-template-columns: 1fr; }
-  .kpi-strip { grid-template-columns: repeat(2, 1fr); }
-  .kpi-strip-5 { grid-template-columns: repeat(3, 1fr); }
+  .kpi-strip { grid-template-columns: repeat(2, 1fr) !important; }
   .app { padding: 0 16px 60px; }
+  .hero h1 { font-size: 32px; }
 }
 @media (max-width: 600px) {
+  .app { padding: 0 12px 60px; }
+  .hero { padding: 28px 0 20px; }
+  .hero h1 { font-size: 26px; }
+  .hero-sub { font-size: 12px; }
+  .hero-actions { gap: 8px; }
+  .btn-refresh { padding: 8px 14px; font-size: 12px; }
   .bar-row { grid-template-columns: 44px 1fr 30px; } .bar-val { display:none; }
-  .debtor-row, .debtor-header { grid-template-columns: 1fr 40px 76px; }
+  .debtor-row, .debtor-header { grid-template-columns: 1fr 40px 76px !important; }
   .debtor-phone { display: none; }
-  .kpi-strip-5 { grid-template-columns: repeat(2, 1fr); }
-  .tabs-nav { overflow-x: auto; }
+  .kpi-strip { grid-template-columns: repeat(2, 1fr) !important; }
+  .tabs-nav { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .tab-btn { padding: 10px 12px; font-size: 10px; }
+  .modal-box { border-radius: 14px 14px 0 0; max-height: 92vh; position: fixed; bottom: 0; left: 0; right: 0; width: 100%; max-width: 100%; }
+  .modal-overlay { align-items: flex-end; padding: 0; }
+  .modal-kpis { grid-template-columns: repeat(2,1fr); }
+  .negociacao-valores { grid-template-columns: 1fr 1fr; }
+  .neg-presets { gap: 4px; }
+  .neg-preset-btn { padding: 4px 8px; font-size: 9px; }
+  .panel { padding: 14px; }
+  .clientes-table th:nth-child(3), .clientes-table td:nth-child(3) { display: none; }
+  .enrich-selector { flex-wrap: wrap; }
 }
 /* ── FIM BLOCO ── */
+
+/* ═══ BLOCO: TRATATIVAS ═══ */
+.tratativas-kpi-strip {
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  gap: 1px; background: var(--border);
+  border: 1px solid var(--border); border-radius: var(--r2);
+  overflow: hidden; margin-bottom: 20px;
+  box-shadow: 0 1px 4px rgba(0,40,20,.06);
+}
+.trat-filters {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px;
+}
+.trat-table { width: 100%; border-collapse: collapse; }
+.trat-table th {
+  font-family: var(--font-mono); font-size: 9px;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--muted); text-align: left;
+  padding: 0 8px 10px; border-bottom: 1px solid var(--border2);
+}
+.trat-table td {
+  padding: 9px 8px; border-bottom: 1px solid var(--border);
+  font-size: 12px; color: var(--muted2);
+}
+.trat-table tr:last-child td { border-bottom: none; }
+.trat-table tr:hover td { background: var(--surface2); color: var(--text); cursor: pointer; }
+
+/* Modal de tratativa */
+.trat-modal-overlay {
+  position: fixed; inset: 0; z-index: 300;
+  background: rgba(26,42,32,.45); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px; opacity: 0; transition: opacity .25s; pointer-events: none;
+}
+.trat-modal-overlay.open { opacity: 1; pointer-events: all; }
+.trat-modal-box {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 16px; width: 100%; max-width: 480px;
+  box-shadow: 0 24px 80px rgba(0,40,20,.18);
+  transform: translateY(16px) scale(.98);
+  transition: transform .28s cubic-bezier(.16,1,.3,1);
+  overflow: hidden;
+}
+.trat-modal-overlay.open .trat-modal-box { transform: translateY(0) scale(1); }
+.trat-modal-header {
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-start; justify-content: space-between;
+}
+.trat-modal-name { font-family: var(--font-display); font-size: 17px; font-weight: 700; font-style: italic; }
+.trat-modal-body { padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; }
+.trat-field { display: flex; flex-direction: column; gap: 5px; }
+.trat-label {
+  font-family: var(--font-mono); font-size: 9px;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
+}
+.trat-select, .trat-textarea, .trat-input-valor {
+  background: var(--surface3); border: 1px solid var(--border2);
+  border-radius: 8px; padding: 10px 12px;
+  font-family: var(--font-body); font-size: 13px; color: var(--text);
+  outline: none; transition: border-color .2s; width: 100%;
+}
+.trat-select:focus, .trat-textarea:focus, .trat-input-valor:focus { border-color: var(--accent); }
+.trat-textarea { min-height: 80px; resize: vertical; }
+.trat-btn-salvar {
+  width: 100%; padding: 13px;
+  background: var(--accent); color: white;
+  border: none; border-radius: 8px;
+  font-family: var(--font-display); font-size: 15px; font-weight: 700; font-style: italic;
+  cursor: pointer; transition: opacity .2s;
+}
+.trat-btn-salvar:hover { opacity: .88; }
+.trat-btn-salvar:disabled { opacity: .4; cursor: not-allowed; }
+.trat-modal-footer { padding: 0 20px 18px; }
+
+/* Historico no modal cliente */
+.trat-historico { margin-top: 4px; }
+.trat-hist-item {
+  padding: 10px 12px; border-radius: 8px;
+  background: var(--surface2); border: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+.trat-hist-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; flex-wrap: wrap; gap: 4px; }
+.trat-hist-vendedora { font-family: var(--font-mono); font-size: 10px; font-weight: 500; color: var(--accent); }
+.trat-hist-data { font-family: var(--font-mono); font-size: 10px; color: var(--muted); }
+.trat-hist-status { font-size: 11px; color: var(--text); font-weight: 500; }
+.trat-hist-obs { font-size: 11px; color: var(--muted2); margin-top: 3px; }
+.trat-hist-acordo { font-family: var(--font-mono); font-size: 11px; color: var(--accent); margin-top: 3px; }
+.btn-nova-tratativa {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 14px; border-radius: 8px;
+  background: var(--accent); color: white;
+  border: none; cursor: pointer;
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: .06em;
+  transition: opacity .2s; white-space: nowrap;
+}
+.btn-nova-tratativa:hover { opacity: .88; }
+@media (max-width: 600px) {
+  .tratativas-kpi-strip { grid-template-columns: repeat(2, 1fr) !important; }
+  .trat-modal-box { border-radius: 14px 14px 0 0; position: fixed; bottom: 0; left: 0; right: 0; width: 100%; max-width: 100%; }
+  .trat-modal-overlay { align-items: flex-end; padding: 0; }
+}
+/* ── FIM BLOCO TRATATIVAS ── */
 </style>
 </head>
 <body>
@@ -809,7 +927,7 @@ body::before {
 <div class="app">
 
   <div class="hero">
-    <div class="hero-eyebrow">DIM+ Saúde &nbsp;·&nbsp; Painel Executivo &nbsp;·&nbsp; Ao vivo &nbsp;<span class="version-badge">v3.8 · 21/05/2026</span></div>
+    <div class="hero-eyebrow">DIM+ Saúde &nbsp;·&nbsp; Painel Executivo &nbsp;·&nbsp; Ao vivo &nbsp;<span class="version-badge">v4.0 · 21/05/2026</span></div>
     <h1>Dashboard<br><span>DIM+ Saúde</span></h1>
     <div class="hero-sub">Cobranças, inadimplência e receita — dados em tempo real via Asaas.</div>
     <div class="hero-actions">
@@ -830,6 +948,7 @@ body::before {
     <button class="tab-btn" onclick="switchTab('receita', this)">Receita</button>
     <button class="tab-btn" onclick="switchTab('clientes', this)">Clientes</button>
     <button class="tab-btn" onclick="switchTab('negativados', this)">Negativados</button>
+    <button class="tab-btn" onclick="switchTab('tratativas', this)">Tratativas</button>
   </nav>
 
   <!-- ═══ ABA: INADIMPLÊNCIA ═══ -->
@@ -1230,6 +1349,77 @@ body::before {
 
   </div><!-- /tab-negativados -->
 
+  <!-- ═══ ABA: TRATATIVAS ═══ -->
+  <div class="tab-pane" id="tab-tratativas">
+
+    <div class="tratativas-kpi-strip fade-in">
+      <div class="kpi-cell c-teal">
+        <div class="kpi-label">Total tratativas</div>
+        <div class="kpi-value c-teal" id="tr1">—</div>
+        <div class="kpi-foot">registros de contato</div>
+      </div>
+      <div class="kpi-cell c-green">
+        <div class="kpi-label">Acordos feitos</div>
+        <div class="kpi-value c-green" id="tr2">—</div>
+        <div class="kpi-foot">aguardando pagamento</div>
+      </div>
+      <div class="kpi-cell c-amber">
+        <div class="kpi-label">Aguardando retorno</div>
+        <div class="kpi-value c-amber" id="tr3">—</div>
+        <div class="kpi-foot">clientes pendentes</div>
+      </div>
+      <div class="kpi-cell c-red">
+        <div class="kpi-label">Sem sucesso</div>
+        <div class="kpi-value c-red" id="tr4">—</div>
+        <div class="kpi-foot">não atingidos</div>
+      </div>
+      <div class="kpi-cell c-gold">
+        <div class="kpi-label">A negativar</div>
+        <div class="kpi-value c-gold" id="tr5">—</div>
+        <div class="kpi-foot">recomendados para negat.</div>
+      </div>
+    </div>
+
+    <div class="panel full-grid">
+      <div class="panel-title">
+        Histórico de tratativas
+        <div class="panel-actions">
+          <div class="trat-filters" style="margin:0;" id="trat-filters">
+            <button class="filter-btn active" onclick="filterTratativas('todos',this)">Todos</button>
+            <button class="filter-btn" onclick="filterTratativas('Sandra',this)">Sandra</button>
+            <button class="filter-btn" onclick="filterTratativas('Rayane',this)">Rayane</button>
+            <button class="filter-btn" onclick="filterTratativas('Mirella',this)">Mirella</button>
+            <button class="filter-btn" onclick="filterTratativas('Acordo feito',this)">Acordos</button>
+            <button class="filter-btn" onclick="filterTratativas('Boleto enviado',this)">Boleto enviado</button>
+            <button class="filter-btn" onclick="filterTratativas('pendentes',this)" style="border-color:var(--accent2);color:var(--accent2);">⚠ Pendentes pagamento</button>
+            <button class="filter-btn" onclick="filterTratativas('Negativar',this)">A negativar</button>
+          </div>
+          <button class="btn-export" onclick="exportTratativasCSV()">↓ CSV</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="trat-table" id="trat-table">
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>Telefone</th>
+              <th>Vendedora</th>
+              <th>Status</th>
+              <th>Observação</th>
+              <th>Valor acordo</th>
+              <th>Data</th>
+            </tr>
+          </thead>
+          <tbody id="trat-tbody">
+            <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px;font-family:var(--font-mono);font-size:11px;">Clique na aba para carregar.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div id="trat-count" style="margin-top:10px;font-family:var(--font-mono);font-size:10px;color:var(--muted);"></div>
+    </div>
+
+  </div><!-- /tab-tratativas -->
+
   <div class="footer">
     <div class="footer-brand">DIM<span>+</span> Saúde</div>
     <div class="footer-meta" id="fmeta">DIMEG · AGUARDANDO CONEXÃO</div>
@@ -1237,7 +1427,54 @@ body::before {
 
 </div>
 
-<!-- ═══ MODAL CLIENTE ═══ -->
+<!-- ═══ MODAL TRATATIVA ═══ -->
+<div class="trat-modal-overlay" id="trat-modal-overlay" onclick="handleTratModalClick(event)">
+  <div class="trat-modal-box">
+    <div class="trat-modal-header">
+      <div>
+        <div class="trat-modal-name" id="trat-modal-nome">—</div>
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--muted);margin-top:3px;" id="trat-modal-phone">—</div>
+      </div>
+      <button class="modal-close" onclick="closeTratModal()">✕</button>
+    </div>
+    <div class="trat-modal-body">
+      <div class="trat-field">
+        <span class="trat-label">Vendedora</span>
+        <select class="trat-select" id="trat-vendedora">
+          <option value="">Selecione...</option>
+          <option value="Sandra">Sandra</option>
+          <option value="Rayane">Rayane</option>
+          <option value="Mirella">Mirella</option>
+        </select>
+      </div>
+      <div class="trat-field">
+        <span class="trat-label">Status do contato</span>
+        <select class="trat-select" id="trat-status">
+          <option value="">Selecione...</option>
+          <option value="Tentativa de contato">Tentativa de contato</option>
+          <option value="Aguardando retorno">Aguardando retorno</option>
+          <option value="Acordo feito">Acordo feito ✓</option>
+          <option value="Boleto enviado">Boleto enviado 📄</option>
+          <option value="Sem sucesso">Sem sucesso</option>
+          <option value="Negativar">Negativar ⚠</option>
+        </select>
+      </div>
+      <div class="trat-field" id="trat-acordo-field" style="display:none;">
+        <span class="trat-label">Valor do acordo (R$)</span>
+        <input type="number" class="trat-input-valor" id="trat-valor-acordo" placeholder="0,00" step="0.01" min="0">
+      </div>
+      <div class="trat-field">
+        <span class="trat-label">Observação</span>
+        <textarea class="trat-textarea" id="trat-obs" placeholder="Descreva o contato, combinados, próximos passos..."></textarea>
+      </div>
+    </div>
+    <div class="trat-modal-footer">
+      <button class="trat-btn-salvar" id="trat-btn-salvar" onclick="salvarTratativa()">
+        Salvar tratativa
+      </button>
+    </div>
+  </div>
+</div>
 <div class="modal-overlay" id="modal-overlay" onclick="handleModalOverlayClick(event)">
   <div class="modal-box" id="modal-box">
 
@@ -1281,6 +1518,10 @@ body::before {
     </div>
 
     <div class="modal-body">
+      <!-- Alerta de acordo pendente -->
+      <div id="modal-acordo-alerta" style="display:none;margin-bottom:14px;padding:10px 14px;background:rgba(224,130,10,.08);border:1px solid rgba(224,130,10,.25);border-radius:8px;font-size:12px;color:var(--accent2);font-family:var(--font-mono);">
+        ⚠ <span id="modal-acordo-alerta-txt"></span>
+      </div>
       <div class="modal-section-title">Histórico de pagamentos · por mês</div>
       <div class="modal-timeline" id="modal-timeline"></div>
       <div class="tl-legend">
@@ -1289,7 +1530,9 @@ body::before {
         <div class="tl-leg-item"><div class="tl-leg-dot" style="background:#E2EBE6;border:1px solid var(--border);"></div>Sem fatura</div>
       </div>
 
-      <div class="modal-section-title" style="margin-top:22px;">Faturas</div>
+      <div class="modal-section-title" style="margin-top:22px;display:flex;align-items:center;justify-content:space-between;">
+        <span>Faturas</span>
+      </div>
       <table class="faturas-table" id="modal-faturas-table">
         <thead>
           <tr>
@@ -1350,6 +1593,18 @@ body::before {
 
     <div class="modal-footer">
       <button class="btn-export" id="modal-export-btn" onclick="exportClienteIndividualCSV()">↓ Exportar CSV deste cliente</button>
+      <button class="btn-nova-tratativa" onclick="abrirTratativaDoModal()">+ Registrar contato</button>
+    </div>
+
+    <!-- Tratativas deste cliente -->
+    <div style="padding:0 24px 20px;">
+      <div class="modal-section-title" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <span>Tratativas registradas</span>
+        <span id="trat-hist-count" style="font-family:var(--font-mono);font-size:10px;color:var(--muted);font-style:normal;font-weight:400;"></span>
+      </div>
+      <div id="trat-historico-modal" class="trat-historico">
+        <div style="color:var(--muted);font-family:var(--font-mono);font-size:11px;">Carregando...</div>
+      </div>
     </div>
 
   </div>
@@ -1358,9 +1613,18 @@ body::before {
 <script>
 /* ═══ BLOCO: ESTADO GLOBAL ═══ */
 const LS = 'dimplus_worker_url';
-let WORKER = localStorage.getItem(LS) || '';
+const WORKER_DEFAULT = 'https://dimplus-asaas.henrrique-paludo.workers.dev';
+let WORKER = localStorage.getItem(LS) || WORKER_DEFAULT;
+// Garantir que o Worker padrão esteja sempre salvo
+if (!localStorage.getItem(LS)) localStorage.setItem(LS, WORKER_DEFAULT);
+
+// Supabase DIM+ Saúde
+const SB_URL  = 'https://bhrxfudnhxqntnnbgyjg.supabase.co';
+const SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJocnhmdWRuaHhxbnRubmJneWpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzNzY0ODUsImV4cCI6MjA5NDk1MjQ4NX0.UQQzoE0wL9HQdYDhpqxcPXN2HJ7TTxeUbuqrGDjaWN8';
+const SB_HEADERS = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
+
 let busy = false;
-let _enrichLimit = 100; // padrão
+let _enrichLimit = 100;
 
 // Cache de dados processados para export e render
 let _cache = {
@@ -1397,10 +1661,8 @@ function switchTab(name, btn) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   btn.classList.add('active');
-  // Carregar negativados ao clicar na aba (lazy load)
-  if (name === 'negativados' && _cache.negativados.length === 0 && WORKER) {
-    loadNegativados();
-  }
+  if (name === 'negativados' && _cache.negativados.length === 0 && WORKER) loadNegativados();
+  if (name === 'tratativas') loadTratativas();
 }
 
 /* ═══ BLOCO: STATUS ═══ */
@@ -1798,7 +2060,7 @@ function renderDebtors(neverPaid) {
       ? `<div style="font-family:var(--font-mono);font-size:10px;color:var(--muted);background:var(--surface3);border-radius:4px;padding:1px 5px;">Sem OVERDUE</div>`
       : `<div class="debtor-val">${toR(d.valorOverdue)}</div>${jurosHtml}`;
     row.innerHTML = `
-      <div class="debtor-name" title="${d.nome}">${d.nome}</div>
+      <div class="debtor-name" title="${d.nome}">${d.nome} ${getTratativaBadge(d.customerId)}</div>
       <div class="debtor-fat">${d.faturas}×</div>
       <div class="debtor-phone">${d.phone}</div>
       <div class="debtor-phone" style="font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${d.email||'—'}">${d.email||'—'}</div>
@@ -1969,7 +2231,7 @@ function renderClientesTabela(clientes, filtro) {
     tr.title = 'Clique para ver faturas';
     tr.onclick = () => openClienteModal(c.customerId);
     tr.innerHTML = `
-      <td>${c.nome}</td>
+      <td>${c.nome} ${getTratativaBadge(c.customerId)}</td>
       <td style="font-family:var(--font-mono);font-size:10px;">${c.phone}</td>
       <td style="font-family:var(--font-mono);font-size:10px;color:var(--muted);">${c.email}</td>
       <td><span class="status-pill ${pillCls}">${pillLabel}</span></td>
@@ -2248,10 +2510,29 @@ function openClienteModal(customerId) {
   // Tabela faturas
   renderModalFaturas(faturas);
 
+  // Alerta de acordo pendente
+  const ultimaTrat = _tratativasMap[customerId];
+  const alertaEl = document.getElementById('modal-acordo-alerta');
+  const alertaTxt = document.getElementById('modal-acordo-alerta-txt');
+  if (ultimaTrat && (ultimaTrat.status === 'Acordo feito' || ultimaTrat.status === 'Boleto enviado')) {
+    const temOverdue = faturas.some(p => p.status === 'OVERDUE');
+    if (temOverdue) {
+      const dt = ultimaTrat.created_at ? new Date(ultimaTrat.created_at).toLocaleDateString('pt-BR') : '—';
+      alertaTxt.textContent = `${ultimaTrat.status} registrado em ${dt} por ${ultimaTrat.vendedora} — ainda há faturas OVERDUE. Confirmar pagamento ou enviar novo boleto.`;
+      alertaEl.style.display = 'block';
+    } else {
+      alertaEl.style.display = 'none';
+    }
+  } else {
+    alertaEl.style.display = 'none';
+  }
+
   // Abrir
   const ov = document.getElementById('modal-overlay');
   ov.classList.add('open');
   document.body.style.overflow = 'hidden';
+  // Carregar tratativas deste cliente
+  loadTratativasCliente(customerId);
 }
 
 function renderModalTimeline(faturas) {
@@ -2701,14 +2982,290 @@ function exportNegativadosCSV() {
 }
 /* ── FIM BLOCO NEGATIVADOS ── */
 
+/* ═══ BLOCO: TRATATIVAS ═══ */
+let _tratativas = [];
+let _tratFiltro = 'todos';
+let _tratModalCustomerId = null;
+const VENDEDORAS = ['Sandra','Rayane','Mirella'];
+const TRAT_STATUS = ['Tentativa de contato','Aguardando retorno','Acordo feito','Boleto enviado','Sem sucesso','Negativar','Resolvido'];
+const TRAT_STATUS_COLORS = {
+  'Tentativa de contato': 'pill-fantasma',
+  'Aguardando retorno':   'pill-churn',
+  'Acordo feito':         'pill-ativo',
+  'Boleto enviado':       'pill-ativo',
+  'Sem sucesso':          'pill-overdue',
+  'Negativar':            'pill-overdue',
+  'Resolvido':            'pill-ativo',
+};
+
+// Mapa de customer_id → última tratativa (atualizado após loadTratativas)
+let _tratativasMap = {}; // customerId → { status, vendedora, created_at }
+
+function getTratativaBadge(customerId) {
+  const t = _tratativasMap[customerId];
+  if (!t) return '';
+  const colors = {
+    'Tentativa de contato': '#6B8C78',
+    'Aguardando retorno':   '#E0820A',
+    'Acordo feito':         '#00A876',
+    'Boleto enviado':       '#00A876',
+    'Sem sucesso':          '#D94F4F',
+    'Negativar':            '#D94F4F',
+    'Resolvido':            '#00A876',
+  };
+  const color = colors[t.status] || 'var(--muted)';
+  return `<span style="font-family:var(--font-mono);font-size:9px;padding:1px 6px;border-radius:10px;background:${color}22;color:${color};border:1px solid ${color}44;white-space:nowrap;">● ${t.status}</span>`;
+}
+
+async function loadTratativas() {
+  try {
+    const r = await fetch(`${SB_URL}/rest/v1/tratativas?order=created_at.desc&limit=500`, { headers: SB_HEADERS });
+    if (!r.ok) throw new Error(`Supabase ${r.status}`);
+    _tratativas = await r.json();
+
+    // Construir mapa customerId → última tratativa
+    _tratativasMap = {};
+    _tratativas.forEach(t => {
+      if (!_tratativasMap[t.customer_id]) {
+        _tratativasMap[t.customer_id] = t; // já está ordenado por created_at desc
+      }
+    });
+
+    // Detectar resolvidos automaticamente: tinha "Acordo feito" ou "Boleto enviado"
+    // mas não tem mais OVERDUE no cache → marcar como Resolvido
+    await detectarResolvidos();
+
+    renderTratativas(_tratativas);
+    renderKPIsTrat(_tratativas);
+  } catch(err) {
+    document.getElementById('trat-tbody').innerHTML =
+      `<tr><td colspan="7" style="text-align:center;color:var(--red);padding:20px;font-family:var(--font-mono);font-size:11px;">Erro: ${err.message}</td></tr>`;
+  }
+}
+
+async function detectarResolvidos() {
+  if (!_cache.all || !_cache.all.length) return;
+
+  // Clientes que têm tratativa "Acordo feito" ou "Boleto enviado"
+  const emAcordo = _tratativas.filter(t =>
+    (t.status === 'Acordo feito' || t.status === 'Boleto enviado') &&
+    t.status !== 'Resolvido'
+  );
+
+  for (const t of emAcordo) {
+    // Verificar se ainda tem OVERDUE no cache
+    const temOverdue = _cache.all.some(p =>
+      p.customer === t.customer_id && p.status === 'OVERDUE'
+    );
+    if (!temOverdue) {
+      // Pagou! Marcar como Resolvido no Supabase
+      try {
+        await fetch(`${SB_URL}/rest/v1/tratativas`, {
+          method: 'POST',
+          headers: SB_HEADERS,
+          body: JSON.stringify({
+            customer_id:    t.customer_id,
+            customer_nome:  t.customer_nome,
+            customer_phone: t.customer_phone,
+            customer_email: t.customer_email,
+            vendedora:      t.vendedora,
+            status:         'Resolvido',
+            observacao:     `Resolvido automaticamente — sem OVERDUE ativo após acordo de ${t.created_at?.slice(0,10)}`,
+            valor_acordo:   t.valor_acordo,
+          })
+        });
+        // Atualizar localmente
+        t.status = 'Resolvido';
+      } catch { /* ignora erro individual */ }
+    }
+  }
+}
+
+function renderKPIsTrat(list) {
+  // Pegar apenas a última tratativa por cliente para os KPIs
+  const ultimas = Object.values(_tratativasMap);
+  countUp(document.getElementById('tr1'), list.length, 'n');
+  countUp(document.getElementById('tr2'), ultimas.filter(t => t.status === 'Acordo feito' || t.status === 'Boleto enviado').length, 'n');
+  countUp(document.getElementById('tr3'), ultimas.filter(t => t.status === 'Aguardando retorno').length, 'n');
+  countUp(document.getElementById('tr4'), ultimas.filter(t => t.status === 'Sem sucesso').length, 'n');
+  countUp(document.getElementById('tr5'), ultimas.filter(t => t.status === 'Negativar').length, 'n');
+}
+
+function renderTratativas(list) {
+  const tbody = document.getElementById('trat-tbody');
+  tbody.innerHTML = '';
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px;font-family:var(--font-mono);font-size:11px;">Nenhuma tratativa registrada.</td></tr>`;
+    document.getElementById('trat-count').textContent = '';
+    return;
+  }
+  list.forEach(t => {
+    const pillCls = TRAT_STATUS_COLORS[t.status] || '';
+    const dt = t.created_at ? new Date(t.created_at).toLocaleString('pt-BR', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '—';
+    const tr = document.createElement('tr');
+    tr.onclick = () => openClienteModal(t.customer_id);
+    tr.innerHTML = `
+      <td>${t.customer_nome || '—'}</td>
+      <td style="font-family:var(--font-mono);font-size:10px;">${t.customer_phone || '—'}</td>
+      <td style="font-family:var(--font-mono);font-size:11px;color:var(--accent);">${t.vendedora}</td>
+      <td><span class="status-pill ${pillCls}">${t.status}</span></td>
+      <td style="font-size:11px;color:var(--muted2);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${t.observacao || '—'}</td>
+      <td style="font-family:var(--font-mono);font-size:11px;color:var(--gold);text-align:right;">${t.valor_acordo ? toR(t.valor_acordo) : '—'}</td>
+      <td style="font-family:var(--font-mono);font-size:10px;color:var(--muted);">${dt}</td>`;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('trat-count').textContent = `${list.length} tratativa${list.length !== 1 ? 's' : ''}`;
+}
+
+function filterTratativas(filtro, btn) {
+  _tratFiltro = filtro;
+  document.querySelectorAll('#trat-filters .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  let filtered = _tratativas;
+  if (filtro === 'pendentes') {
+    // Acordos feitos ou boleto enviado que ainda têm OVERDUE ativo
+    const customerIdsComOverdue = new Set(
+      (_cache.all || []).filter(p => p.status === 'OVERDUE').map(p => p.customer)
+    );
+    filtered = Object.values(_tratativasMap).filter(t =>
+      (t.status === 'Acordo feito' || t.status === 'Boleto enviado') &&
+      customerIdsComOverdue.has(t.customer_id)
+    );
+  } else if (filtro !== 'todos') {
+    filtered = _tratativas.filter(t => t.vendedora === filtro || t.status === filtro);
+  }
+  renderTratativas(filtered);
+}
+
+function exportTratativasCSV() {
+  const rows = [['Cliente','Telefone','Vendedora','Status','Observação','Valor Acordo','Data']];
+  _tratativas.forEach(t => {
+    rows.push([
+      t.customer_nome||'—', t.customer_phone||'—', t.vendedora, t.status,
+      t.observacao||'—', t.valor_acordo ? toRFull(t.valor_acordo) : '—',
+      t.created_at ? new Date(t.created_at).toLocaleString('pt-BR') : '—'
+    ]);
+  });
+  downloadCSV('dimplus_tratativas.csv', rows);
+}
+
+// ── Modal de tratativa ──
+function abrirTratativaDoModal() {
+  abrirTratModal(_modalClienteId);
+}
+
+function abrirTratModal(customerId) {
+  _tratModalCustomerId = customerId;
+  const cli = _cache.clientes.find(c => c.customerId === customerId);
+  const info = _cache.customers[customerId] || {};
+  document.getElementById('trat-modal-nome').textContent = info.name || cli?.nome || '—';
+  document.getElementById('trat-modal-phone').textContent = info.phone || cli?.phone || '—';
+  document.getElementById('trat-vendedora').value = '';
+  document.getElementById('trat-status').value = '';
+  document.getElementById('trat-obs').value = '';
+  document.getElementById('trat-valor-acordo').value = '';
+  document.getElementById('trat-acordo-field').style.display = 'none';
+  document.getElementById('trat-btn-salvar').disabled = false;
+  document.getElementById('trat-btn-salvar').textContent = 'Salvar tratativa';
+  const ov = document.getElementById('trat-modal-overlay');
+  ov.classList.add('open');
+}
+
+document.getElementById('trat-status')?.addEventListener('change', function() {
+  const show = this.value === 'Acordo feito';
+  document.getElementById('trat-acordo-field').style.display = show ? 'block' : 'none';
+});
+
+function closeTratModal() {
+  document.getElementById('trat-modal-overlay').classList.remove('open');
+}
+function handleTratModalClick(e) {
+  if (e.target === document.getElementById('trat-modal-overlay')) closeTratModal();
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeTratModal(); });
+
+async function salvarTratativa() {
+  const vendedora = document.getElementById('trat-vendedora').value;
+  const status    = document.getElementById('trat-status').value;
+  const obs       = document.getElementById('trat-obs').value.trim();
+  const valorAcordo = document.getElementById('trat-valor-acordo').value;
+
+  if (!vendedora) { alert('Selecione a vendedora.'); return; }
+  if (!status)    { alert('Selecione o status.'); return; }
+
+  const cli  = _cache.clientes.find(c => c.customerId === _tratModalCustomerId);
+  const info = _cache.customers[_tratModalCustomerId] || {};
+
+  const btn = document.getElementById('trat-btn-salvar');
+  btn.disabled = true;
+  btn.textContent = 'Salvando...';
+
+  try {
+    const body = {
+      customer_id:    _tratModalCustomerId,
+      customer_nome:  info.name  || cli?.nome  || '—',
+      customer_phone: info.phone || cli?.phone || '—',
+      customer_email: info.email || cli?.email || '—',
+      vendedora, status, observacao: obs || null,
+      valor_acordo: valorAcordo ? parseFloat(valorAcordo) : null,
+    };
+    const r = await fetch(`${SB_URL}/rest/v1/tratativas`, {
+      method: 'POST', headers: SB_HEADERS, body: JSON.stringify(body)
+    });
+    if (!r.ok) throw new Error(`Supabase ${r.status}`);
+    closeTratModal();
+    // Recarregar histórico do cliente e lista global
+    await loadTratativasCliente(_tratModalCustomerId);
+    await loadTratativas();
+    btn.textContent = '✓ Salvo!';
+  } catch(err) {
+    alert('Erro ao salvar: ' + err.message);
+    btn.disabled = false;
+    btn.textContent = 'Salvar tratativa';
+  }
+}
+
+async function loadTratativasCliente(customerId) {
+  const wrap = document.getElementById('trat-historico-modal');
+  if (!wrap) return;
+  wrap.innerHTML = '<div style="color:var(--muted);font-family:var(--font-mono);font-size:11px;">Carregando...</div>';
+  try {
+    const r = await fetch(
+      `${SB_URL}/rest/v1/tratativas?customer_id=eq.${customerId}&order=created_at.desc`,
+      { headers: SB_HEADERS }
+    );
+    const lista = r.ok ? await r.json() : [];
+    const count = document.getElementById('trat-hist-count');
+    if (count) count.textContent = lista.length > 0 ? `${lista.length} registro${lista.length!==1?'s':''}` : '';
+    if (!lista.length) {
+      wrap.innerHTML = '<div style="color:var(--muted);font-family:var(--font-mono);font-size:11px;padding:8px 0;">Nenhuma tratativa registrada para este cliente.</div>';
+      return;
+    }
+    wrap.innerHTML = '';
+    lista.forEach(t => {
+      const pillCls = TRAT_STATUS_COLORS[t.status] || '';
+      const dt = t.created_at ? new Date(t.created_at).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '—';
+      const div = document.createElement('div');
+      div.className = 'trat-hist-item';
+      div.innerHTML = `
+        <div class="trat-hist-header">
+          <span class="trat-hist-vendedora">● ${t.vendedora}</span>
+          <span class="trat-hist-data">${dt}</span>
+        </div>
+        <span class="status-pill ${pillCls}" style="font-size:9px;">${t.status}</span>
+        ${t.observacao ? `<div class="trat-hist-obs">${t.observacao}</div>` : ''}
+        ${t.valor_acordo ? `<div class="trat-hist-acordo">Acordo: ${toRFull(t.valor_acordo)}</div>` : ''}`;
+      wrap.appendChild(div);
+    });
+  } catch { wrap.innerHTML = '<div style="color:var(--muted);font-family:var(--font-mono);font-size:11px;">Erro ao carregar tratativas.</div>'; }
+}
+/* ── FIM BLOCO TRATATIVAS ── */
+
 /* ═══ BLOCO: INIT ═══ */
 window.addEventListener('DOMContentLoaded', () => {
-  if (WORKER) {
-    document.getElementById('setup-overlay').style.display = 'none';
-    loadData();
-  } else {
-    setTimeout(() => document.getElementById('wurl').focus(), 300);
-  }
+  // Worker fixo — esconder setup overlay sempre
+  document.getElementById('setup-overlay').style.display = 'none';
+  loadData();
 });
 /* ── FIM BLOCO ── */
 </script>
