@@ -809,7 +809,7 @@ body::before {
 <div class="app">
 
   <div class="hero">
-    <div class="hero-eyebrow">DIM+ Saúde &nbsp;·&nbsp; Painel Executivo &nbsp;·&nbsp; Ao vivo &nbsp;<span class="version-badge">v3.5 · 21/05/2026</span></div>
+    <div class="hero-eyebrow">DIM+ Saúde &nbsp;·&nbsp; Painel Executivo &nbsp;·&nbsp; Ao vivo &nbsp;<span class="version-badge">v3.6 · 21/05/2026</span></div>
     <h1>Dashboard<br><span>DIM+ Saúde</span></h1>
     <div class="hero-sub">Cobranças, inadimplência e receita — dados em tempo real via Asaas.</div>
     <div class="hero-actions">
@@ -2539,18 +2539,27 @@ async function loadNegativados() {
   try {
     const dunnings = await fetchAll('/paymentDunnings', {});
 
-    // Enrich forçado — busca mesmo que já tenha no cache
-    const customerIds = [...new Set(dunnings.map(d => d.customer).filter(Boolean))];
+    // Cruzar payment ID com _cache.all para pegar customer ID
+    const paymentMap = {};
+    (_cache.all || []).forEach(p => { if (p.id) paymentMap[p.id] = p.customer; });
+
+    dunnings.forEach(d => {
+      const customerId = paymentMap[d.payment];
+      if (customerId) d._customerId = customerId;
+    });
+
+    // Enrich forçado dos customer IDs encontrados
+    const customerIds = [...new Set(dunnings.map(d => d._customerId).filter(Boolean))];
     if (customerIds.length > 0) {
-      setStatus('loading', `Buscando nomes de ${customerIds.length} clientes negativados...`);
-      const enriched = await enrichCustomers(customerIds.slice(0, 100),
+      setStatus('loading', `Buscando nomes de ${customerIds.length} negativados...`);
+      const enriched = await enrichCustomers(customerIds,
         (done, total) => setStatus('loading', `Negativados: ${done}/${total} nomes...`));
       Object.assign(_cache.customers, enriched);
     }
 
     // Aplicar nomes e CPFs
     dunnings.forEach(d => {
-      const c = _cache.customers[d.customer];
+      const c = _cache.customers[d._customerId];
       if (c) { d._nome = c.name; d._cpf = c.cpfCnpj; d._phone = c.phone; }
     });
 
