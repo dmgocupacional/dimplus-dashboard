@@ -776,7 +776,7 @@ body::before {
 <div class="app">
 
   <div class="hero">
-    <div class="hero-eyebrow">DIM+ Saúde &nbsp;·&nbsp; Painel Executivo &nbsp;·&nbsp; Ao vivo &nbsp;<span class="version-badge">v3.0 · 20/05/2026</span></div>
+    <div class="hero-eyebrow">DIM+ Saúde &nbsp;·&nbsp; Painel Executivo &nbsp;·&nbsp; Ao vivo &nbsp;<span class="version-badge">v3.2 · 20/05/2026</span></div>
     <h1>Dashboard<br><span>DIM+ Saúde</span></h1>
     <div class="hero-sub">Cobranças, inadimplência e receita — dados em tempo real via Asaas.</div>
     <div class="hero-actions">
@@ -796,6 +796,7 @@ body::before {
     <button class="tab-btn active" onclick="switchTab('inadimplencia', this)">Inadimplência</button>
     <button class="tab-btn" onclick="switchTab('receita', this)">Receita</button>
     <button class="tab-btn" onclick="switchTab('clientes', this)">Clientes</button>
+    <button class="tab-btn" onclick="switchTab('negativados', this)">Negativados</button>
   </nav>
 
   <!-- ═══ ABA: INADIMPLÊNCIA ═══ -->
@@ -1126,6 +1127,72 @@ body::before {
 
   </div><!-- /tab-clientes -->
 
+  <!-- ═══ ABA: NEGATIVADOS ═══ -->
+  <div class="tab-pane" id="tab-negativados">
+
+    <div class="kpi-strip kpi-strip-3 fade-in" id="kpi-neg" style="grid-template-columns:repeat(4,1fr);">
+      <div class="kpi-cell c-red">
+        <div class="kpi-label">Total negativados</div>
+        <div class="kpi-value c-red" id="n1">—</div>
+        <div class="kpi-foot">registros enviados</div>
+        <div class="kpi-icon">⚠</div>
+      </div>
+      <div class="kpi-cell c-amber">
+        <div class="kpi-label">Valor total</div>
+        <div class="kpi-value c-amber" id="n2">—</div>
+        <div class="kpi-foot">soma das dívidas negativadas</div>
+        <div class="kpi-icon">$</div>
+      </div>
+      <div class="kpi-cell c-gold">
+        <div class="kpi-label">Ativos</div>
+        <div class="kpi-value c-gold" id="n3">—</div>
+        <div class="kpi-foot">negativações em vigor</div>
+        <div class="kpi-icon">!</div>
+      </div>
+      <div class="kpi-cell c-teal">
+        <div class="kpi-label">Cancelados</div>
+        <div class="kpi-value c-teal" id="n4">—</div>
+        <div class="kpi-foot">removidos da negativação</div>
+        <div class="kpi-icon">✓</div>
+      </div>
+    </div>
+
+    <div class="panel full-grid">
+      <div class="panel-title">
+        Lista de negativados
+        <div class="panel-actions">
+          <div class="clientes-filters" style="margin:0;" id="neg-filters">
+            <button class="filter-btn active" onclick="filterNegativados('todos',this)">Todos</button>
+            <button class="filter-btn" onclick="filterNegativados('REQUESTED',this)">Solicitado</button>
+            <button class="filter-btn" onclick="filterNegativados('RECEIVED',this)">Ativo</button>
+            <button class="filter-btn" onclick="filterNegativados('CANCELLED',this)">Cancelado</button>
+            <button class="filter-btn" onclick="filterNegativados('AWAITING_CANCELLATION',this)">Aguard. cancelamento</button>
+          </div>
+          <button class="btn-export" onclick="exportNegativadosCSV()">↓ CSV</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="clientes-table" id="neg-table">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>CPF/CNPJ</th>
+              <th>Tipo</th>
+              <th>Status</th>
+              <th>Valor</th>
+              <th>Data solicitação</th>
+            </tr>
+          </thead>
+          <tbody id="neg-tbody">
+            <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px;font-family:var(--font-mono);font-size:11px;">Clique na aba para carregar.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div id="neg-count" style="margin-top:10px;font-family:var(--font-mono);font-size:10px;color:var(--muted);"></div>
+    </div>
+
+  </div><!-- /tab-negativados -->
+
   <div class="footer">
     <div class="footer-brand">DIM<span>+</span> Saúde</div>
     <div class="footer-meta" id="fmeta">DIMEG · AGUARDANDO CONEXÃO</div>
@@ -1148,6 +1215,8 @@ body::before {
           <span id="modal-status-pill"></span>
           <span>·</span>
           <span id="modal-tempo">—</span>
+          <span>·</span>
+          <span id="modal-primeira" style="color:var(--muted);">—</span>
         </div>
       </div>
       <button class="modal-close" onclick="closeModal()" title="Fechar (ESC)">✕</button>
@@ -1244,13 +1313,14 @@ let _enrichLimit = 100; // padrão
 
 // Cache de dados processados para export e render
 let _cache = {
-  all: [],           // todas as faturas
-  neverPaid: [],     // CPFs que nunca pagaram (com dados de customer)
-  byCustomer: {},    // mapa customerId → dados
-  customers: {},     // mapa customerId → { name, phone, cpfCnpj }
-  receitaMensal: {}, // mapa YYYY-MM → { recebido, aberto }
-  clientes: [],      // lista de clientes para aba clientes
-  allCustomerIds: [], // todos os IDs únicos de clientes
+  all: [],
+  neverPaid: [],
+  byCustomer: {},
+  customers: {},
+  receitaMensal: {},
+  clientes: [],
+  allCustomerIds: [],
+  negativados: [],
 };
 
 /* ═══ BLOCO: SETUP ═══ */
@@ -1276,6 +1346,10 @@ function switchTab(name, btn) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   btn.classList.add('active');
+  // Carregar negativados ao clicar na aba (lazy load)
+  if (name === 'negativados' && _cache.negativados.length === 0 && WORKER) {
+    loadNegativados();
+  }
 }
 
 /* ═══ BLOCO: STATUS ═══ */
@@ -1633,8 +1707,10 @@ function renderDonut(neverPaid) {
 function renderDebtors(neverPaid) {
   const dl = document.getElementById('debtor-list');
   dl.innerHTML = '';
-  const top = neverPaid.slice(0, 15);
-  if (!top.length) { dl.innerHTML = '<p style="color:var(--muted);font-size:12px;">Sem dados.</p>'; return; }
+  // Ordenar por valorOverdue desc, depois por valor total desc
+  const sorted = [...neverPaid].sort((a, b) => (b.valorOverdue - a.valorOverdue) || (b.valor - a.valor));
+  const top = sorted.slice(0, 20);
+  if (!top.length) { dl.innerHTML = '<p style="color:var(--muted);font-size:12px;">Sem dados neste filtro.</p>'; return; }
   top.forEach(d => {
     const row = document.createElement('div');
     row.className = 'debtor-row';
@@ -1642,18 +1718,19 @@ function renderDebtors(neverPaid) {
     row.title = 'Clique para ver faturas';
     row.onclick = () => openClienteModal(d.customerId);
     const tag = d.categoria === 'Perdido' ? 'tag-lost' : 'tag-ghost';
-    const temJuros = d.valorComJuros > d.valorOverdue;
+    const semOverdue = d.valorOverdue === 0;
+    const temJuros = !semOverdue && d.valorComJuros > d.valorOverdue + 0.01;
     const jurosHtml = temJuros
       ? `<div style="font-family:var(--font-mono);font-size:9px;color:var(--red);margin-top:1px;">c/ juros: ${toR(d.valorComJuros)}</div>`
       : '';
+    const valorHtml = semOverdue
+      ? `<div style="font-family:var(--font-mono);font-size:10px;color:var(--muted);background:var(--surface3);border-radius:4px;padding:1px 5px;">Sem OVERDUE</div>`
+      : `<div class="debtor-val">${toR(d.valorOverdue)}</div>${jurosHtml}`;
     row.innerHTML = `
       <div class="debtor-name" title="${d.nome}">${d.nome}</div>
       <div class="debtor-fat">${d.faturas}×</div>
       <div class="debtor-phone">${d.phone}</div>
-      <div>
-        <div class="debtor-val">${toR(d.valorOverdue)}</div>
-        ${jurosHtml}
-      </div>
+      <div>${valorHtml}</div>
       <div><span class="debtor-tag ${tag}">${d.categoria}</span></div>`;
     dl.appendChild(row);
   });
@@ -2044,8 +2121,10 @@ function openClienteModal(customerId) {
     const meses = (now.getFullYear() - d0.getFullYear()) * 12 + (now.getMonth() - d0.getMonth());
     document.getElementById('modal-tempo').textContent =
       meses <= 0 ? 'Menos de 1 mês' : meses === 1 ? '1 mês de casa' : `${meses} meses de casa`;
+    document.getElementById('modal-primeira').textContent = `1ª parcela: ${primeira}`;
   } else {
     document.getElementById('modal-tempo').textContent = '—';
+    document.getElementById('modal-primeira').textContent = '';
   }
 
   // KPIs
@@ -2358,6 +2437,117 @@ function copiarWhatsApp() {
   });
 }
 /* ── FIM BLOCO CALCULADORA ── */
+
+/* ═══ BLOCO: NEGATIVADOS ═══ */
+let _negFiltro = 'todos';
+
+async function loadNegativados() {
+  const tbody = document.getElementById('neg-tbody');
+  tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px;font-family:var(--font-mono);font-size:11px;">⏳ Carregando negativações...</td></tr>`;
+
+  try {
+    const dunnings = await fetchAll('/paymentDunnings', {});
+    _cache.negativados = dunnings;
+    renderNegativados(dunnings);
+    renderKPIsNeg(dunnings);
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--red);padding:20px;font-family:var(--font-mono);font-size:11px;">Erro: ${err.message}</td></tr>`;
+  }
+}
+
+function renderKPIsNeg(dunnings) {
+  const total     = dunnings.length;
+  const valorTotal = dunnings.reduce((s,d) => s+(d.value||d.amount||0), 0);
+  const ativos    = dunnings.filter(d => d.status === 'RECEIVED' || d.status === 'REQUESTED').length;
+  const cancelados = dunnings.filter(d => d.status === 'CANCELLED').length;
+  countUp(document.getElementById('n1'), total, 'n');
+  countUp(document.getElementById('n2'), valorTotal, 'r');
+  countUp(document.getElementById('n3'), ativos, 'n');
+  countUp(document.getElementById('n4'), cancelados, 'n');
+}
+
+const negStatusLabel = {
+  REQUESTED:            ['pill-overdue',  'Solicitado'],
+  RECEIVED:             ['pill-ativo',    'Ativo'],
+  CANCELLED:            ['pill-churn',    'Cancelado'],
+  AWAITING_CANCELLATION:['pill-fantasma', 'Aguard. cancelamento'],
+  FAILED:               ['pill-overdue',  'Falhou'],
+};
+
+const negTypeLabel = {
+  CREDIT_BUREAU: 'Serasa',
+  CARTORIO:      'Cartório',
+};
+
+function renderNegativados(dunnings) {
+  _negFiltro = 'todos';
+  document.querySelectorAll('#neg-filters .filter-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('#neg-filters .filter-btn').classList.add('active');
+  _renderNegTabela(dunnings);
+}
+
+function filterNegativados(filtro, btn) {
+  _negFiltro = filtro;
+  document.querySelectorAll('#neg-filters .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const filtered = filtro === 'todos'
+    ? _cache.negativados
+    : _cache.negativados.filter(d => d.status === filtro);
+  _renderNegTabela(filtered);
+}
+
+function _renderNegTabela(list) {
+  const tbody = document.getElementById('neg-tbody');
+  tbody.innerHTML = '';
+
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px;font-family:var(--font-mono);font-size:11px;">Nenhum registro neste filtro.</td></tr>`;
+    document.getElementById('neg-count').textContent = '';
+    return;
+  }
+
+  list.forEach(d => {
+    const [pillCls, pillLabel] = negStatusLabel[d.status] || ['', d.status];
+    const tipo = negTypeLabel[d.type] || d.type || '—';
+    const valor = d.value || d.amount || 0;
+    const data = d.requestDate || d.dateCreated || d.createdAt || '—';
+    const nome = d.customerName || d.customer || '—';
+    const cpf  = d.customerCpfCnpj || '—';
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${nome}</td>
+      <td style="font-family:var(--font-mono);font-size:10px;">${cpf}</td>
+      <td style="font-family:var(--font-mono);font-size:10px;color:var(--muted2);">${tipo}</td>
+      <td><span class="status-pill ${pillCls}">${pillLabel}</span></td>
+      <td style="font-family:var(--font-mono);font-size:11px;color:var(--gold);text-align:right;">${toR(valor)}</td>
+      <td style="font-family:var(--font-mono);font-size:10px;color:var(--muted);">${data}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('neg-count').textContent =
+    `${list.length} registro${list.length !== 1 ? 's' : ''}`;
+}
+
+function exportNegativadosCSV() {
+  const filtro = _negFiltro;
+  const list = filtro === 'todos'
+    ? _cache.negativados
+    : _cache.negativados.filter(d => d.status === filtro);
+  const rows = [['Nome','CPF/CNPJ','Tipo','Status','Valor','Data solicitação']];
+  list.forEach(d => {
+    rows.push([
+      d.customerName || d.customer || '—',
+      d.customerCpfCnpj || '—',
+      negTypeLabel[d.type] || d.type || '—',
+      d.status,
+      toRFull(d.value || d.amount || 0),
+      d.requestDate || d.dateCreated || '—',
+    ]);
+  });
+  downloadCSV('dimplus_negativados.csv', rows);
+}
+/* ── FIM BLOCO NEGATIVADOS ── */
 
 /* ═══ BLOCO: INIT ═══ */
 window.addEventListener('DOMContentLoaded', () => {
