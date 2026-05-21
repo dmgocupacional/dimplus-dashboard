@@ -927,7 +927,7 @@ body::before {
 <div class="app">
 
   <div class="hero">
-    <div class="hero-eyebrow">DIM+ Saúde &nbsp;·&nbsp; Painel Executivo &nbsp;·&nbsp; Ao vivo &nbsp;<span class="version-badge">v4.8 · 21/05/2026</span></div>
+    <div class="hero-eyebrow">DIM+ Saúde &nbsp;·&nbsp; Painel Executivo &nbsp;·&nbsp; Ao vivo &nbsp;<span class="version-badge">v5.0 · 21/05/2026</span></div>
     <h1>Dashboard<br><span>DIM+ Saúde</span></h1>
     <div class="hero-sub">Cobranças, inadimplência e receita — dados em tempo real via Asaas.</div>
     <div class="hero-actions">
@@ -1424,21 +1424,61 @@ body::before {
       <div style="overflow-x:auto;">
         <table class="trat-table" id="trat-table">
           <thead>
-            <tr>
-              <th>Cliente</th>
+            <tr id="trat-thead-filters">
+              <th>
+                <div style="display:flex;flex-direction:column;gap:4px;">
+                  <span>Cliente</span>
+                  <input type="text" id="col-nome" oninput="aplicarFiltrosTratativas()" placeholder="Filtrar..." style="font-family:var(--font-mono);font-size:9px;padding:2px 6px;border:1px solid var(--border2);border-radius:4px;background:var(--surface3);color:var(--text);outline:none;width:100%;">
+                </div>
+              </th>
               <th>CPF</th>
               <th>Telefone</th>
               <th>Valor em aberto</th>
-              <th>Prioridade</th>
-              <th>Último contato</th>
-              <th>Status tratativa</th>
-              <th>Vendedora</th>
+              <th>
+                <div style="display:flex;flex-direction:column;gap:4px;">
+                  <span>Último contato</span>
+                  <select id="col-periodo" onchange="aplicarFiltrosTratativas()" style="font-family:var(--font-mono);font-size:9px;padding:2px 4px;border:1px solid var(--border2);border-radius:4px;background:var(--surface3);color:var(--text);outline:none;width:100%;">
+                    <option value="">Todos</option>
+                    <option value="hoje">Hoje</option>
+                    <option value="semana">Esta semana</option>
+                    <option value="mes">Este mês</option>
+                    <option value="sem">Sem contato</option>
+                  </select>
+                </div>
+              </th>
+              <th>
+                <div style="display:flex;flex-direction:column;gap:4px;">
+                  <span>Status</span>
+                  <select id="col-status" onchange="aplicarFiltrosTratativas()" style="font-family:var(--font-mono);font-size:9px;padding:2px 4px;border:1px solid var(--border2);border-radius:4px;background:var(--surface3);color:var(--text);outline:none;width:100%;">
+                    <option value="">Todos</option>
+                    <option value="Tentativa de contato">Tentativa</option>
+                    <option value="Aguardando retorno">Aguardando</option>
+                    <option value="Acordo feito">Acordo</option>
+                    <option value="Boleto enviado">Boleto</option>
+                    <option value="Sem sucesso">Sem sucesso</option>
+                    <option value="Negativar">Negativar</option>
+                    <option value="sem_tratativa">Sem contato</option>
+                    <option value="pendentes">⚠ Pendentes</option>
+                  </select>
+                </div>
+              </th>
+              <th>
+                <div style="display:flex;flex-direction:column;gap:4px;">
+                  <span>Vendedora</span>
+                  <select id="col-vendedora" onchange="aplicarFiltrosTratativas()" style="font-family:var(--font-mono);font-size:9px;padding:2px 4px;border:1px solid var(--border2);border-radius:4px;background:var(--surface3);color:var(--text);outline:none;width:100%;">
+                    <option value="">Todas</option>
+                    <option value="Sandra">Sandra</option>
+                    <option value="Rayane">Rayane</option>
+                    <option value="Mirella">Mirella</option>
+                  </select>
+                </div>
+              </th>
               <th>Observação</th>
               <th style="text-align:center;">Ação</th>
             </tr>
           </thead>
           <tbody id="trat-tbody">
-            <tr><td colspan="10" style="text-align:center;color:var(--muted);padding:20px;font-family:var(--font-mono);font-size:11px;">Clique na aba para carregar.</td></tr>
+            <tr><td colspan="9" style="text-align:center;color:var(--muted);padding:20px;font-family:var(--font-mono);font-size:11px;">Clique na aba para carregar.</td></tr>
           </tbody>
         </table>
       </div>
@@ -2474,8 +2514,8 @@ async function runEnrichAndRenderClientes() {
   }
   const idsPorValor = [...allValidIds].sort((a,b) => (pagoById[b]||0) - (pagoById[a]||0));
 
-  // IDs dos neverPaid (sempre enrich independente do limite)
-  const idsInad = _cache.neverPaid.slice(0, 60).map(r => r.customerId);
+  // IDs dos neverPaid (sempre enrich independente do limite — todos)
+  const idsInad = _cache.neverPaid.map(r => r.customerId);
 
   // IDs da aba clientes conforme limite
   const limit = _enrichLimit === 'todos' ? allValidIds.length : _enrichLimit;
@@ -2723,18 +2763,19 @@ function renderModalTimeline(faturas) {
     else if (p.status === 'OVERDUE') byMonth[k].aberto++;
   }
 
-  // Range do 1º até hoje
+  // Range do 1º até hoje — sem duplicatas
   const datas = Object.keys(byMonth).sort();
   if (!datas.length) return;
   const [y0, m0] = datas[0].split('-').map(Number);
   const now = new Date();
   const meses = [];
+  const mesesSet = new Set();
   let y = y0, m = m0;
   while (y < now.getFullYear() || (y === now.getFullYear() && m <= now.getMonth()+1)) {
     const k = `${y}-${String(m).padStart(2,'0')}`;
-    meses.push(k);
+    if (!mesesSet.has(k)) { meses.push(k); mesesSet.add(k); }
     m++; if (m > 12) { m = 1; y++; }
-    if (meses.length > 36) break; // max 3 anos
+    if (meses.length > 36) break;
   }
 
   meses.forEach(k => {
@@ -3307,7 +3348,6 @@ function renderTratativas(list) {
       <td style="font-family:var(--font-mono);font-size:10px;">${cpf}</td>
       <td style="font-family:var(--font-mono);font-size:10px;">${t.customer_phone || '—'}</td>
       <td style="font-family:var(--font-mono);font-size:11px;color:var(--accent2);">${overdueVal > 0 ? toR(overdueVal) : '—'}</td>
-      <td style="font-family:var(--font-mono);font-size:10px;">${prioridade}</td>
       <td style="font-family:var(--font-mono);font-size:10px;color:var(--muted);">${dt}</td>
       <td>${t.status ? `<span class="status-pill ${pillCls}">${t.status}</span>` : '<span style="color:var(--muted);font-size:11px;">— Sem contato</span>'}</td>
       <td style="font-family:var(--font-mono);font-size:11px;color:var(--accent);">${t.vendedora || '—'}</td>
@@ -3324,65 +3364,97 @@ function renderTratativas(list) {
 // ── Filtro combinado ──
 function aplicarFiltrosTratativas() {
   const busca   = (document.getElementById('trat-busca')?.value || '').toLowerCase().trim();
-  const vend    = document.getElementById('trat-fil-vendedora')?.value || '';
-  const status  = document.getElementById('trat-fil-status')?.value || '';
-  const periodo = document.getElementById('trat-fil-periodo')?.value || 'todos';
+  // Filtros dos selects externos (manter compatibilidade)
+  const vendExt = document.getElementById('trat-fil-vendedora')?.value || '';
+  const statusExt = document.getElementById('trat-fil-status')?.value || '';
+  const periodoExt = document.getElementById('trat-fil-periodo')?.value || 'todos';
+  // Filtros das colunas
+  const colNome    = (document.getElementById('col-nome')?.value || '').toLowerCase().trim();
+  const colPeriodo = document.getElementById('col-periodo')?.value || '';
+  const colStatus  = document.getElementById('col-status')?.value || '';
+  const colVend    = document.getElementById('col-vendedora')?.value || '';
+
+  const vend   = colVend   || vendExt;
+  const status = colStatus || statusExt;
+  const periodo = colPeriodo || periodoExt;
 
   const now = new Date();
   const inicioDia    = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const inicioSemana = new Date(inicioDia); inicioSemana.setDate(inicioDia.getDate() - inicioDia.getDay());
   const inicioMes    = new Date(now.getFullYear(), now.getMonth(), 1);
 
-  // Base: última tratativa por cliente + clientes sem tratativa
+  // Base: SOMENTE clientes com OVERDUE ativo
+  const overdueCustomerIds = new Set(
+    (_cache.all || []).filter(p => p.status === 'OVERDUE').map(p => p.customer).filter(Boolean)
+  );
+
+  // Incluir também clientes que têm tratativa mas pagaram (Resolvido)
   const clienteIds = new Set([
+    ...overdueCustomerIds,
     ..._tratativas.map(t => t.customer_id),
-    ...(_cache.clientes || []).map(c => c.customerId),
   ]);
 
-  let rows = [...clienteIds].map(cid => {
-    const ultima = _tratativasMap[cid];
-    const cli = _cache.clientes.find(c => c.customerId === cid);
-    const info = _cache.customers[cid] || {};
-    return {
-      customer_id:    cid,
-      customer_nome:  info.name  || cli?.nome  || '—',
-      customer_phone: info.phone || cli?.phone || '—',
-      status:  ultima?.status || '',
-      vendedora: ultima?.vendedora || '',
-      observacao: ultima?.observacao || '',
-      valor_acordo: ultima?.valor_acordo || 0,
-      created_at: ultima?.created_at || '',
-    };
-  });
+  // Filtrar só os que têm OVERDUE OU têm tratativa ativa (não resolvido)
+  let rows = [...clienteIds]
+    .filter(cid => {
+      const temOverdue = overdueCustomerIds.has(cid);
+      const ultima = _tratativasMap[cid];
+      // Mostrar se tem OVERDUE ou se tem tratativa que não é Resolvido
+      return temOverdue || (ultima && ultima.status !== 'Resolvido');
+    })
+    .map(cid => {
+      const ultima = _tratativasMap[cid];
+      const cli = _cache.clientes.find(c => c.customerId === cid);
+      const info = _cache.customers[cid] || {};
+      return {
+        customer_id:    cid,
+        customer_nome:  info.name  || cli?.nome  || '—',
+        customer_phone: info.phone || cli?.phone || '—',
+        status:    ultima?.status    || '',
+        vendedora: ultima?.vendedora || '',
+        observacao: ultima?.observacao || '',
+        valor_acordo: ultima?.valor_acordo || 0,
+        created_at: ultima?.created_at || '',
+      };
+    });
 
-  // Filtro busca
-  if (busca) {
+  // Filtro busca geral
+  if (busca || colNome) {
+    const q = busca || colNome;
     rows = rows.filter(r => {
       const cpf = (_cache.customers[r.customer_id]?.cpfCnpj || '').toLowerCase();
-      return r.customer_nome.toLowerCase().includes(busca) ||
-             r.customer_phone.toLowerCase().includes(busca) ||
-             cpf.includes(busca);
+      return r.customer_nome.toLowerCase().includes(q) ||
+             r.customer_phone.toLowerCase().includes(q) ||
+             cpf.includes(q);
     });
   }
 
   // Filtro vendedora
   if (vend) rows = rows.filter(r => r.vendedora === vend);
 
-  // Filtro status especial
+  // Filtro status
   if (status === 'pendentes') {
-    const comOverdue = new Set((_cache.all||[]).filter(p=>p.status==='OVERDUE').map(p=>p.customer));
-    rows = rows.filter(r => (r.status==='Acordo feito'||r.status==='Boleto enviado') && comOverdue.has(r.customer_id));
+    rows = rows.filter(r => (r.status==='Acordo feito'||r.status==='Boleto enviado') && overdueCustomerIds.has(r.customer_id));
   } else if (status === 'sem_tratativa') {
     rows = rows.filter(r => !r.status);
   } else if (status) {
     rows = rows.filter(r => r.status === status);
   }
 
-  // Filtro período (por data da última tratativa)
-  if (periodo !== 'todos') {
+  // Filtro período
+  if (periodo === 'sem') {
+    rows = rows.filter(r => !r.created_at);
+  } else if (periodo !== 'todos' && periodo) {
     const inicio = periodo === 'hoje' ? inicioDia : periodo === 'semana' ? inicioSemana : inicioMes;
     rows = rows.filter(r => r.created_at && new Date(r.created_at) >= inicio);
   }
+
+  // Ordenar: sem contato primeiro, depois por data mais recente
+  rows.sort((a, b) => {
+    if (!a.created_at && b.created_at) return -1;
+    if (a.created_at && !b.created_at) return 1;
+    return (b.created_at || '').localeCompare(a.created_at || '');
+  });
 
   renderTratativas(rows);
 }
