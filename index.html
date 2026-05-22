@@ -927,7 +927,7 @@ body::before {
 <div class="app">
 
   <div class="hero">
-    <div class="hero-eyebrow">DIM+ Saúde &nbsp;·&nbsp; Painel Executivo &nbsp;·&nbsp; Ao vivo &nbsp;<span class="version-badge">v5.2 · 22/05/2026</span></div>
+    <div class="hero-eyebrow">DIM+ Saúde &nbsp;·&nbsp; Painel Executivo &nbsp;·&nbsp; Ao vivo &nbsp;<span class="version-badge">v5.3 · 22/05/2026</span></div>
     <h1>Dashboard<br><span>DIM+ Saúde</span></h1>
     <div class="hero-sub">Cobranças, inadimplência e receita — dados em tempo real via Asaas.</div>
     <div class="hero-actions">
@@ -2019,7 +2019,8 @@ async function enrichCustomers(customerIds, onProgress) {
 function processInadimplencia(payments) {
   const byCustomer = {};
   for (const p of payments) {
-    const k = p.customer || p.id;
+    const k = p.customer; // só agrupar por customer real — ignorar faturas órfãs
+    if (!k) continue;
     if (!byCustomer[k]) byCustomer[k] = { rows: [] };
     byCustomer[k].rows.push(p);
   }
@@ -2087,8 +2088,11 @@ function processReceita(payments) {
       receitaMensal[mes].recebido += p.value || 0;
       totalRecebido += p.value || 0;
       pagantesSet.add(p.customer);
-      if (mes === mesAtual) recMesAtual += p.value || 0;
-      if (mes === mesAnterior) recMesAnterior += p.value || 0;
+      // Usar paymentDate (data real do pagamento) para recMesAtual/recMesAnterior
+      // evita duplicação quando dueDate e paymentDate caem em meses diferentes
+      const mesPago = (p.paymentDate || p.clientPaymentDate || p.dueDate).slice(0,7);
+      if (mesPago === mesAtual) recMesAtual += p.value || 0;
+      if (mesPago === mesAnterior) recMesAnterior += p.value || 0;
     } else if (isOverdue) {
       receitaMensal[mes].aberto += p.value || 0;
       totalOverdue++;
@@ -2109,7 +2113,8 @@ function processReceita(payments) {
 function processClientes(payments, customersMap) {
   const byCustomer = {};
   for (const p of payments) {
-    const k = p.customer || p.id;
+    const k = p.customer; // só agrupar por customer real — ignorar faturas órfãs sem customer
+    if (!k) continue;
     if (!byCustomer[k]) byCustomer[k] = { rows: [], pago: 0 };
     byCustomer[k].rows.push(p);
     if (['RECEIVED','CONFIRMED','RECEIVED_IN_CASH'].includes(p.status)) {
