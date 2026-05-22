@@ -927,7 +927,7 @@ body::before {
 <div class="app">
 
   <div class="hero">
-    <div class="hero-eyebrow">DIM+ Saúde &nbsp;·&nbsp; Painel Executivo &nbsp;·&nbsp; Ao vivo &nbsp;<span class="version-badge">v5.0 · 21/05/2026</span></div>
+    <div class="hero-eyebrow">DIM+ Saúde &nbsp;·&nbsp; Painel Executivo &nbsp;·&nbsp; Ao vivo &nbsp;<span class="version-badge">v5.2 · 22/05/2026</span></div>
     <h1>Dashboard<br><span>DIM+ Saúde</span></h1>
     <div class="hero-sub">Cobranças, inadimplência e receita — dados em tempo real via Asaas.</div>
     <div class="hero-actions">
@@ -1950,10 +1950,44 @@ function setEnrichProgress(done, total, txt) {
 }
 
 /* ═══ BLOCO: FETCH CUSTOMERS (batch com progresso) ═══ */
+// Enrich massivo via listagem paginada — muito mais eficiente para muitos clientes
+async function enrichAllCustomersFromList(onProgress) {
+  const result = {};
+  let offset = 0;
+  const LIMIT = 100;
+  let total = null;
+  let done = 0;
+  while (true) {
+    try {
+      const r = await fetch(`${WORKER}/customers?limit=${LIMIT}&offset=${offset}`);
+      if (!r.ok) break;
+      const d = await r.json();
+      const items = Array.isArray(d.data) ? d.data : [];
+      if (!total && d.totalCount) total = d.totalCount;
+      items.forEach(c => {
+        if (c.id) {
+          result[c.id] = {
+            name: c.name || '—',
+            phone: c.mobilePhone || c.phone || '—',
+            cpfCnpj: c.cpfCnpj || '—',
+            email: c.email || '—',
+          };
+        }
+      });
+      done += items.length;
+      if (onProgress && total) onProgress(done, total);
+      if (!d.hasMore || items.length === 0) break;
+      offset += LIMIT;
+    } catch { break; }
+  }
+  return result;
+}
+
 async function enrichCustomers(customerIds, onProgress) {
   const result = {};
-  const ids = [...new Set(customerIds)];
-  const BATCH = 8; // paralelo por lote
+  const ids = [...new Set(customerIds)].filter(id => id && id !== 'undefined');
+  if (!ids.length) return result;
+  const BATCH = 10;
   let done = 0;
   for (let i = 0; i < ids.length; i += BATCH) {
     const chunk = ids.slice(i, i + BATCH);
@@ -1962,16 +1996,21 @@ async function enrichCustomers(customerIds, onProgress) {
         const r = await fetch(`${WORKER}/customers/${id}`);
         if (!r.ok) return;
         const d = await r.json();
-        result[id] = {
-          name: d.name || '—',
-          phone: d.mobilePhone || d.phone || '—',
-          cpfCnpj: d.cpfCnpj || '—',
-          email: d.email || '—',
-        };
-      } catch { /* ignora falha individual */ }
+        if (d.id) {
+          result[id] = {
+            name: d.name || '—',
+            phone: d.mobilePhone || d.phone || '—',
+            cpfCnpj: d.cpfCnpj || '—',
+            email: d.email || '—',
+          };
+        }
+      } catch { }
     }));
     done += chunk.length;
     if (onProgress) onProgress(done, ids.length);
+    if (done % 50 === 0 && done < ids.length) {
+      await new Promise(r => setTimeout(r, 200));
+    }
   }
   return result;
 }
@@ -3260,12 +3299,39 @@ async function loadTratativas() {
       }
     });
 
+    // Enrich massivo via listagem — muito mais eficiente que um por um
+    const overdueIds = new Set(
+      (_cache.all || []).filter(p => p.status === 'OVERDUE').map(p => p.customer).filter(Boolean)
+    );
+    const semNome = [...overdueIds].filter(id => !_cache.customers[id]);
+    if (semNome.length > 0) {
+      setStatus('loading', `Buscando nomes (${semNome.length} clientes)...`);
+      // Se muitos, usar listagem paginada (mais eficiente)
+      if (semNome.length > 50) {
+        const enriched = await enrichAllCustomersFromList(
+          (done, total) => setStatus('loading', `Buscando nomes: ${done}/${total}...`)
+        );
+        Object.assign(_cache.customers, enriched);
+      } else {
+        const enriched = await enrichCustomers(semNome,
+          (done, total) => setStatus('loading', `Buscando nomes: ${done}/${total}...`)
+        );
+        Object.assign(_cache.customers, enriched);
+      }
+      // Re-aplicar nomes nos neverPaid
+      _cache.neverPaid.forEach(r => {
+        const c = _cache.customers[r.customerId];
+        if (c && (!r.nome || r.nome === '—')) { r.nome = c.name; r.phone = c.phone; r.email = c.email; }
+      });
+      setStatus('live', `${(_cache.all||[]).length} faturas · dados ao vivo`);
+    }
+
     await detectarResolvidos();
     aplicarFiltrosTratativas();
     renderKPIsTrat(_tratativas);
   } catch(err) {
     document.getElementById('trat-tbody').innerHTML =
-      `<tr><td colspan="7" style="text-align:center;color:var(--red);padding:20px;font-family:var(--font-mono);font-size:11px;">Erro: ${err.message}</td></tr>`;
+      `<tr><td colspan="9" style="text-align:center;color:var(--red);padding:20px;font-family:var(--font-mono);font-size:11px;">Erro: ${err.message}</td></tr>`;
   }
 }
 
